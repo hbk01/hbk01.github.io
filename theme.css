@@ -1,6 +1,7 @@
 body {
     height: 100%;
     font-family: 'Courier New', Courier, monospace;
+    font-size: 16px;
 }
 
 a { 
@@ -15,4 +16,24 @@ a {
     background-color: #f5f5f5;
     border: 1px solid #323232;
     border-left-width: 5px;
+}
+
+.buttons {
+    text-align: center;
+}
+
+input {
+    width: 98%;
+    height: 32px;
+    margin-top: 3px;
+    line-height: 32px;
+}
+
+button {
+    height: 32px;
+    width: 128px;
+    text-align: center;
+    background-color: deepskyblue;
+    border: 0;
+    border-radius: 6px;
 }

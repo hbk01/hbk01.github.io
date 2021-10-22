@@ -4,11 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <!-- 尝试适配 Safari 浏览器点击输入框页面会放大的问题 -->
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
-    <meta name="viewport" content="width=device-width; initial-scale=1.0; minimum-scale=1.0; maximum-scale=1.0"/> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>干燥失重</title>
     <link rel="stylesheet" href="./github.css">
+    <link rel="stylesheet" href="./theme.css">
     <script src="./decimal.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
@@ -101,6 +100,8 @@
 </head>
 
 <body>
+    样品名：<input type="text" name="lod-name" id="lod-name"><br><br>
+
     <div class="one-team">
         第一组（Lod1）<br>
         <input type="number" name="m0l" id="m0l" class="one-input m0" placeholder="m0"><br>
@@ -117,7 +118,9 @@
         <br>
     </div>
 
-    <button id="ok">确定</button>
+    <div class="buttons">
+        <button id="ok">确定</button>
+    </div>
 
     <div class="msgbox"></div>
 
