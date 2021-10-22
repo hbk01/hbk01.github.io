@@ -1,11 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="github.css">
+    <link rel="stylesheet" href="theme.css">
+    <script>
+        window.onload = function () {
+        }
+
+        function goUrl(url) {
+            window.location.href = url;
+        }
+    </script>
     <title>QC TOOL</title>
 </head>
+
 <body>
-    Hey! This is my github pages site! I will try to use the service to create my <a href="https://gitee.com/hbk01/qctool">qc tool</a>.
+    <div class="list">
+        <div class="item" onclick="window.location.href='/titer.html'">
+            标水(Titer)
+        </div>
+        <div class="item" onclick="window.location.href='./lod.html'">
+            干燥失重(Lod)
+        </div>
+    </div>
 </body>
+
 </html>

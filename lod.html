@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>干燥失重</title>
+    <link rel="stylesheet" href="./github.css">
+    <script src="./decimal.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        var debug = true;
+        var tip = "<br>" +
+            "操作过程：" +
+            "<br>" +
+            "空瓶 -> 干燥3小时 -> 冷却称重(1) -> 干燥1小时 -> 冷却称重(2-1) -> 加样(2-2) -> 干燥3小时 -> 冷却称重(3) -> 干燥1小时 -> 冷却称重(4)" +
+            "<br>" +
+            "<br>" +
+            "m0=恒重后空瓶重（2-1）<br>" +
+            "m1=样品重（2-2）<br>" +
+            "m3=干燥恒重后带样品重（4）";
+
+        var decimal = Decimal.set(
+            {
+                rounding: Decimal.ROUND_HALF_EVEN,
+                precision: 12
+            }
+        );
+
+
+        $(document).ready(function () {
+
+            $(".msgbox").append(tip)
+
+            $("#ok").click(function () {
+                var m0l = document.getElementById("m0l").value;
+                var m1l = document.getElementById("m1l").value;
+                var m3l = document.getElementById("m3l").value;
+
+                var m0r = document.getElementById("m0r").value;
+                var m1r = document.getElementById("m1r").value;
+                var m3r = document.getElementById("m3r").value;
+
+
+                var lod1 = lod(m0l, m1l, m3l)
+                var lod2 = lod(m0r, m1r, m3r)
+                var average = decimal.add(lod1, lod2).div(2).toString();
+                // var average = Decimal.add(lod1, lod2).div(2).round(Decimal.ROUND_HALF_EVEN).toString();
+                // var average = "1";
+
+                message(
+                    "<br>" + 
+                    "Lod1 = " + lod1 + "<br>" +
+                    "Lod2 = " + lod2 + "<br>" +
+                    "Average(Lod1,Lod2) = " + average + "<br>"
+                );
+            });
+
+            if (debug) {
+                document.getElementById("m0l").value = 18.34625;
+                document.getElementById("m1l").value = 1.04213;
+                document.getElementById("m3l").value = 19.38511;
+            }
+        });
+
+        function message(msg) {
+            $(".msgbox").empty();
+            $(".msgbox").append(msg);
+        }
+
+        /**
+         * 计算干燥失重
+         * @param m0 恒重后空瓶重
+         * @param m1 样品重
+         * @param m3 干燥恒重后带样品重
+         * @return 干燥失重（%）
+         */
+        function lod(m0, m1, m3) {
+            if (checkNull(m0, m1, m3)) {
+                return "0";
+            }
+
+            var a = new Decimal(m0);
+            var b = new Decimal(m1);
+            var c = new Decimal(m3);
+
+            // a + b - c / b
+            var d = decimal.add(a, b).minus(c);
+            var e = d.div(b).mul(100);
+            return e.toString();
+        }
+
+        function checkNull(m0, m1, m3) {
+            return m0 == '' || m1 == '' || m3 == '';
+        }
+
+    </script>
+</head>
+
+<body>
+    <div class="one-team">
+        第一组（Lod1）<br>
+        <input type="number" name="m0l" id="m0l" class="one-input m0" placeholder="m0"><br>
+        <input type="number" name="m1l" id="m1l" class="one-input m1" placeholder="m1"><br>
+        <input type="number" name="m3l" id="m3l" class="one-input m3" placeholder="m3"><br>
+        <br>
+    </div>
+
+    <div class="two-team">
+        第二组（Lod2）<br>
+        <input type="number" name="m0r" id="m0r" class="two-input m0" placeholder="m0"><br>
+        <input type="number" name="m1r" id="m1r" class="two-input m1" placeholder="m1"><br>
+        <input type="number" name="m3r" id="m3r" class="two-input m3" placeholder="m3"><br>
+        <br>
+    </div>
+
+    <button id="ok">确定</button>
+
+    <div class="msgbox"></div>
+
+</body>
+
+</html>
