@@ -1,0 +1,18 @@
+body {
+    height: 100%;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+a { 
+    outline: none;
+    text-decoration: none;
+    color: cornflowerblue;
+}
+
+.item { 
+    margin-top: 5px;
+    padding-left: 10px;
+    background-color: #f5f5f5;
+    border: 1px solid #323232;
+    border-left-width: 5px;
+}
