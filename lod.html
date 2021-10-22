@@ -31,31 +31,61 @@
 
 
         $(document).ready(function () {
+            var input_m0l = document.getElementById("m0l");
+            var input_m1l = document.getElementById("m1l");
+            var input_m3l = document.getElementById("m3l");
+            var input_m0r = document.getElementById("m0r");
+            var input_m1r = document.getElementById("m1r");
+            var input_m3r = document.getElementById("m3r");
 
             $(".msgbox").append(tip)
 
             $("#ok").click(function () {
-                var m0l = document.getElementById("m0l").value;
-                var m1l = document.getElementById("m1l").value;
-                var m3l = document.getElementById("m3l").value;
+                var m0l = input_m0l.value;
+                var m1l = input_m1l.value;
+                var m3l = input_m3l.value;
 
-                var m0r = document.getElementById("m0r").value;
-                var m1r = document.getElementById("m1r").value;
-                var m3r = document.getElementById("m3r").value;
+                var m0r = input_m0r.value;
+                var m1r = input_m1r.value;
+                var m3r = input_m3r.value;
 
 
                 var lod1 = lod(m0l, m1l, m3l)
                 var lod2 = lod(m0r, m1r, m3r)
                 var average = decimal.add(lod1, lod2).div(2).toString();
-                // var average = Decimal.add(lod1, lod2).div(2).round(Decimal.ROUND_HALF_EVEN).toString();
-                // var average = "1";
 
-                message(
-                    "<br>" + 
+                var msg = "<br>" +
                     "Lod1 = " + lod1 + "<br>" +
-                    "Lod2 = " + lod2 + "<br>" +
-                    "Average(Lod1,Lod2) = " + average + "<br>"
-                );
+                    "Lod2 = " + lod2 + "<br>";
+
+                if (m0l != '' && m1l != '') {
+                    msg += "m0+m1(Lod1) = " + decimal.add(m0l, m1l).toString() + "<br>";
+                }
+
+                if (m0r != '' && m1r != '') {
+                    msg += "m0+m1(Lod2) = " + decimal.add(m0r, m1r).toString() + "<br>";
+                }
+                msg += "Average(Lod1,Lod2) = " + average + "<br>";
+
+
+
+
+                message(msg);
+            });
+
+            $("#clear").click(function () {
+                input_m0l.value = "";
+                input_m1l.value = "";
+                input_m3l.value = "";
+                input_m0r.value = "";
+                input_m1r.value = "";
+                input_m3r.value = "";
+
+                message(tip);
+            });
+
+            $("#new_page").click(function () {
+                window.open(window.location.href, "_blank");
             });
 
             if (debug) {
@@ -100,7 +130,7 @@
 </head>
 
 <body>
-    样品名：<input type="text" name="lod-name" id="lod-name"><br><br>
+    <input type="text" name="lod-name" id="lod-name" placeholder="样品批号"><br><br>
 
     <div class="one-team">
         第一组（Lod1）<br>
@@ -119,7 +149,9 @@
     </div>
 
     <div class="buttons">
-        <button id="ok">确定</button>
+        <button id="new_page">新开标签页</button>
+        <button id="clear">清除内容</button>
+        <button id="ok">计算</button>
     </div>
 
     <div class="msgbox"></div>

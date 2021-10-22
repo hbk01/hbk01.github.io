@@ -36,9 +36,8 @@ input {
 
 button {
     height: 32px;
-    width: 128px;
+    width: 96px;
     text-align: center;
-
     background-color: #f6f8fa;
     color: #24292f;
     border: 1px solid;
