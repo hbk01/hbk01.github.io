@@ -1,6 +1,6 @@
 body {
     height: 100%;
-    font-family: 'Courier New', Courier, monospace;
+    /* font-family: 'Courier New', Courier, monospace; */
     font-size: 16px;
 }
 
@@ -23,9 +23,9 @@ a {
 }
 
 input {
-    width: 98%;
+    width: 97%;
     height: 32px;
-    margin-top: 3px;
+    margin-top: 5px;
     line-height: 32px;
 }
 
@@ -33,7 +33,10 @@ button {
     height: 32px;
     width: 128px;
     text-align: center;
-    background-color: deepskyblue;
-    border: 0;
+
+    background-color: #f6f8fa;
+    color: #24292f;
+    border: 1px solid;
     border-radius: 6px;
+    border-color: rgba(27, 31, 36, 0.15);
 }
