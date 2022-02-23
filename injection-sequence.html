@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>进样序列(Injection Sequence)</title>
+    <link rel="stylesheet" href="./github.css">
+    <link rel="stylesheet" href="./theme.css">
+    <script src="./decimal.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var time = document.getElementById("time");
+            var num = document.getElementById("num");
+            var ptime = document.getElementById("ptime");
+
+            $("#ok").click(function () {
+                message("time: " + time.value);
+                message("ptime: " + ptime.value);
+                message("num: " + num.value);
+            });
+
+            $("#clear").click(function () {
+                time.value = "";
+                times.value = "";
+                $(".output").empty();
+            });
+
+            $("#new_page").click(function () {
+                window.open(window.location.href, "_blank");
+            });
+        });
+
+        function message(text) {
+            $(".output").append(text, "<br>");
+        }
+    </script>
+</head>
+<body>
+    <div class="input">
+        <div class="inputbox">
+            <input type="number" name="time" id="time" placeholder="多少分钟一针" inputmode="decimal">
+            <input type="number" name="prefix-time" id="p-time" placeholder="时间提前" value='0' inputmode="decimal">
+            <input type="number" name="num" id="num" placeholder="一共有多少针" inputmode="decimal">
+        </div>
+        <div class="buttons">
+            <button id="new_page">新开标签页</button>
+            <button id="clear">清除内容</button>
+            <button id="ok">计算</button>
+        </div>
+    </div>
+    <div class="output">
+
+    </div>
+</body>
+</html>
