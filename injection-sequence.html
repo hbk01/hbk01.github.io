@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,21 +11,43 @@
     <script src="./decimal.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
-        $(document).ready(function() {
-            var time = document.getElementById("time");
-            var num = document.getElementById("num");
-            var ptime = document.getElementById("ptime");
+        var decimal = Decimal.set(
+            {
+                rounding: Decimal.ROUND_HALF_EVEN,
+                precision: 12
+            }
+        );
+        $(document).ready(function () {
+            var output = document.getElementById("output");
+            //
+            var tip = "S(n) = $now() + (t * n) - s - p";
+            output.innerHTML = tip;
 
+            // TODO: 将整个进样序列的时间节点计算出来
             $("#ok").click(function () {
-                message("time: " + time.value);
-                message("ptime: " + ptime.value);
-                message("num: " + num.value);
+                var time = document.getElementById("time").value;
+                var num = document.getElementById("num").value;
+                var ptime = document.getElementById("ptime").value;
+                var stime = document.getElementById("stime").value;
+
+                var t = InjectionSequence(time, ptime, stime, num);
+                var t_hour = Math.floor(t / 60);
+                var t_min = t % 60;
+                message("将在 " + t + "分钟 后进样");
+                messageAppend("将在 " + t_hour + "小时" + t_min + "分钟 后进样");
+
+                var date = new Date();
+                var dateAfter = new Date(date.getFullYear(), date.getMonth(), date.getDate(),
+                    date.getHours() + t_hour, date.getMinutes() + t_min);
+                messageAppend("将在 " + dateAfter.format("yyyy-MM-dd hh:mm") + " 时进样");
             });
 
             $("#clear").click(function () {
                 time.value = "";
-                times.value = "";
-                $(".output").empty();
+                num.value = "";
+                ptime.value = "";
+                stime.value = "";
+                $("#output").empty();
             });
 
             $("#new_page").click(function () {
@@ -32,26 +55,79 @@
             });
         });
 
-        function message(text) {
-            $(".output").append(text, "<br>");
+        /**
+         * 计算总共的进样时间
+         * @param time 多少分钟一针
+         * @param ptime 时间需要提前多少分钟
+         * @param stime 现在这针运行多少分钟
+         * @param num 计算第n针后的时间
+         */
+        function InjectionSequence(time, ptime, stime, num) {
+            // formal: InjectionSequence = time * num - ptime - stime
+            var t = new Decimal(time);
+            var p = new Decimal(ptime);
+            var s = new Decimal(stime);
+            var n = new Decimal(num);
+
+            var time = decimal.mul(t, n).sub(p).sub(s);
+            return time.toString();
         }
+
+        function messageAppend(message) {
+            output.innerHTML += message + "<br>";
+        }
+
+        function message(text) {
+            $("#output").empty();
+            $("#output").append(text + "<br>");
+        }
+
+        // 为 Date 创建日期格式化方法
+        Date.prototype.format = function (fmt) {
+            var o = {
+                "M+": this.getMonth() + 1,                 //月份
+                "d+": this.getDate(),                    //日
+                "h+": this.getHours(),                   //小时
+                "m+": this.getMinutes(),                 //分
+                "s+": this.getSeconds(),                 //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                "S": this.getMilliseconds()             //毫秒
+            };
+            if (/(y+)/.test(fmt)) {
+                fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            }
+            for (var k in o) {
+                if (new RegExp("(" + k + ")").test(fmt)) {
+                    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                }
+            }
+            return fmt;
+        }
+
     </script>
 </head>
+
 <body>
     <div class="input">
         <div class="inputbox">
-            <input type="number" name="time" id="time" placeholder="多少分钟一针" inputmode="decimal">
-            <input type="number" name="prefix-time" id="p-time" placeholder="时间提前" value='0' inputmode="decimal">
-            <input type="number" name="num" id="num" placeholder="一共有多少针" inputmode="decimal">
+            <input type="number" name="time" id="time" placeholder="t = 多少分钟一针" inputmode="decimal" autocomplete="off">
+            <input type="number" name="prefix-time" id="ptime" placeholder="p = 时间需要提前多少分钟" inputmode="decimal"
+                autocomplete="off">
+            <input type="number" name="suffix-time" id="stime" placeholder="s = 现在这针运行多少分钟" inputmode="decimal"
+                autocomplete="off">
+            <input type="number" name="num" id="num" placeholder="n = 一共有多少针（包括正在运行的）" inputmode="decimal"
+                autocomplete="off">
         </div>
+        <br>
         <div class="buttons">
             <button id="new_page">新开标签页</button>
             <button id="clear">清除内容</button>
             <button id="ok">计算</button>
         </div>
     </div>
-    <div class="output">
+    <div id="output">
 
     </div>
 </body>
+
 </html>
