@@ -8,6 +8,57 @@
     <title>进样序列</title>
     <link rel="stylesheet" href="./github.css">
     <link rel="stylesheet" href="./theme.css">
+    <style>
+        table {
+            width: 90%;
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        td,
+        th {
+            padding: 0;
+        }
+
+        .pure-table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            empty-cells: show;
+            border: 1px solid #cbcbcb;
+        }
+
+        .pure-table caption {
+            color: #000;
+            font: italic 85%/1 arial, sans-serif;
+            padding: 1em 0;
+            text-align: center;
+        }
+
+        .pure-table td,
+        .pure-table th {
+            border-left: 1px solid #cbcbcb;
+            border-width: 0 0 0 1px;
+            font-size: inherit;
+            margin: 0;
+            overflow: visible;
+            padding: .5em 1em;
+        }
+
+        .pure-table thead {
+            background-color: #e0e0e0;
+            color: #000;
+            text-align: left;
+            vertical-align: bottom;
+        }
+
+        .pure-table td {
+            background-color: transparent;
+        }
+
+        .pure-table-odd td {
+            background-color: #f2f2f2;
+        }
+    </style>
     <script src="./decimal.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
@@ -20,27 +71,34 @@
         $(document).ready(function () {
             var output = document.getElementById("output");
             //
-            var tip = "S(n) = $now() + (t * n) - s - p";
+            var tip = "计算每一针走完的时间。<br>"
+                + "设置时间提前量可以将每针的时间提前，用于给看样及配样等操作留时间。";
             output.innerHTML = tip;
 
-            // TODO: 将整个进样序列的时间节点计算出来
             $("#ok").click(function () {
+                $("#output").empty();
                 var time = document.getElementById("time").value;
                 var num = document.getElementById("num").value;
                 var ptime = document.getElementById("ptime").value;
                 var stime = document.getElementById("stime").value;
+                var data = [];
 
-                var t = InjectionSequence(time, ptime, stime, num);
-                var t_hour = Math.floor(t / 60);
-                var t_min = t % 60;
-                message("将在 " + t + "分钟 后进样");
-                messageAppend("将在 " + t_hour + "小时" + t_min + "分钟 后进样");
+                // 生成数据
+                for (var i = 1; i <= num; i++) {
+                    var t = InjectionSequenceToDate(time, ptime, stime, i);
+                    data.push({
+                        "id": i,
+                        "time": t
+                    });
+                }
 
-                var date = new Date();
-                var dateAfter = new Date(date.getFullYear(), date.getMonth(), date.getDate(),
-                    date.getHours() + t_hour, date.getMinutes() + t_min);
-                messageAppend("将在 " + dateAfter.format("yyyy-MM-dd hh:mm") + " 时进样");
+                if (data.length == 0) {
+                    // 未生成数据，不进行结果展示
+                    return;
+                }
+                output.appendChild(createTable(data));
             });
+
 
             $("#clear").click(function () {
                 time.value = "";
@@ -54,6 +112,53 @@
                 window.open(window.location.href, "_blank");
             });
         });
+
+        /**
+         * 计算进样时间，返回 yyyy-MM-dd hh:mm 格式的字符串
+         */
+        function InjectionSequenceToDate(time, ptime, stime, num) {
+            var t = InjectionSequence(time, ptime, stime, num);
+            var t_hour = Math.floor(t / 60);
+            var t_min = t % 60;
+            var date = new Date();
+            var dateAfter = new Date(date.getFullYear(), date.getMonth(), date.getDate(),
+                date.getHours() + t_hour, date.getMinutes() + t_min).format("yyyy-MM-dd hh:mm");
+            return dateAfter;
+        }
+
+        /**
+         * 创建表格元素并将数据填入其中。
+         */
+        function createTable(data) {
+            var table = document.createElement("table");
+
+            var row = document.createElement("tr");
+            var th1 = document.createElement("th");
+            var th2 = document.createElement("th");
+            th1.innerText = "第几针";
+            th2.innerText = "进样时间";
+            row.appendChild(th1);
+            row.appendChild(th2);
+            table.appendChild(row);
+            data.forEach(element => {
+                var tr = document.createElement("tr");
+
+                if (element.id % 2 == 1) {
+                    tr.className = "pure-table-odd";
+                }
+
+                var td_id = document.createElement("td");
+                var td_time = document.createElement("td");
+
+                td_id.innerText = element.id;
+                td_time.innerText = element.time;
+
+                tr.appendChild(td_id);
+                tr.appendChild(td_time);
+                table.appendChild(tr);
+            });
+            return table;
+        }
 
         /**
          * 计算总共的进样时间
@@ -111,13 +216,10 @@
     <h3>进样序列</h3>
     <div class="input">
         <div class="inputbox">
-            <input type="number" name="time" id="time" placeholder="t = 多少分钟一针" inputmode="decimal" autocomplete="off">
-            <input type="number" name="prefix-time" id="ptime" placeholder="p = 时间需要提前多少分钟" inputmode="decimal"
-                autocomplete="off">
-            <input type="number" name="suffix-time" id="stime" placeholder="s = 现在这针运行多少分钟" inputmode="decimal"
-                autocomplete="off">
-            <input type="number" name="num" id="num" placeholder="n = 一共有多少针（包括正在运行的）" inputmode="decimal"
-                autocomplete="off">
+            <input type="number" id="time" placeholder="多少分钟一针" inputmode="decimal" autocomplete="off">
+            <input type="number" id="num" placeholder="一共有多少针（包括正在运行的）" inputmode="decimal" autocomplete="off">
+            <input type="number" id="stime" placeholder="现在这针运行多少分钟" inputmode="decimal" autocomplete="off">
+            <input type="number" id="ptime" placeholder="时间提前量（分钟）" inputmode="decimal" autocomplete="off">
         </div>
         <br>
         <div class="buttons">
