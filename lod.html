@@ -51,6 +51,11 @@
                 var lod2 = lod(m0r, m1r, m3r)
                 var average = decimal.add(lod1, lod2).div(2).toString();
 
+                // 结果小于0时，使用红色字体
+                lod1 = (lod1 < 0) ? "<span style='color: red;'>" + lod1 + "</span>" : lod1;
+                lod2 = (lod2 < 0) ? "<span style='color: red;'>" + lod2 + "</span>" : lod2;
+                average = (average < 0) ? "<span style='color: red;'>" + average + "</span>" : average;
+
                 var msg = "<br>" +
                     "第一组干燥失重 = " + lod1 + "<br>" +
                     "第二组干燥失重 = " + lod2 + "<br>" +
