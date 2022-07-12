@@ -118,7 +118,7 @@
          */
         function InjectionSequenceToDate(time, ptime, stime, num) {
             var t = InjectionSequence(time, ptime, stime, num);
-            var t_hour = Math.floor(t / 60);
+            var t_hour = Math.floor(Math.abs(t) / 60);
             var t_min = t % 60;
             var date = new Date();
             var dateAfter = new Date(date.getFullYear(), date.getMonth(), date.getDate(),
