@@ -8,57 +8,6 @@
     <title>进样序列</title>
     <link rel="stylesheet" href="./github.css">
     <link rel="stylesheet" href="./theme.css">
-    <style>
-        table {
-            width: 90%;
-            border-collapse: collapse;
-            border-spacing: 0;
-        }
-
-        td,
-        th {
-            padding: 0;
-        }
-
-        .pure-table {
-            border-collapse: collapse;
-            border-spacing: 0;
-            empty-cells: show;
-            border: 1px solid #cbcbcb;
-        }
-
-        .pure-table caption {
-            color: #000;
-            font: italic 85%/1 arial, sans-serif;
-            padding: 1em 0;
-            text-align: center;
-        }
-
-        .pure-table td,
-        .pure-table th {
-            border-left: 1px solid #cbcbcb;
-            border-width: 0 0 0 1px;
-            font-size: inherit;
-            margin: 0;
-            overflow: visible;
-            padding: .5em 1em;
-        }
-
-        .pure-table thead {
-            background-color: #e0e0e0;
-            color: #000;
-            text-align: left;
-            vertical-align: bottom;
-        }
-
-        .pure-table td {
-            background-color: transparent;
-        }
-
-        .pure-table-odd td {
-            background-color: #f2f2f2;
-        }
-    </style>
     <script src="./decimal.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
@@ -131,6 +80,8 @@
          */
         function createTable(data) {
             var table = document.createElement("table");
+            table.setAttribute("style", "width: 100%;");
+            table.setAttribute("class", "pure-table");
 
             var row = document.createElement("tr");
             var th1 = document.createElement("th");
@@ -229,9 +180,7 @@
         </div>
         <br>
     </div>
-    <div id="output">
-
-    </div>
+    <div id="output"></div>
 </body>
 
 </html>

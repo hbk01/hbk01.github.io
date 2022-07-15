@@ -4,13 +4,13 @@ body {
     font-size: 16px;
 }
 
-a { 
+a {
     outline: none;
     text-decoration: none;
     color: cornflowerblue;
 }
 
-.item { 
+.item {
     height: 32px;
     text-align: left;
     line-height: 32px;
@@ -43,4 +43,54 @@ button {
     border: 1px solid;
     border-radius: 6px;
     border-color: rgba(27, 31, 36, 0.15);
+}
+
+table {
+    width: 90%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+td,
+th {
+    padding: 0;
+}
+
+.pure-table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    empty-cells: show;
+    border: 1px solid #cbcbcb;
+}
+
+.pure-table caption {
+    color: #000;
+    font: italic 85%/1 arial, sans-serif;
+    padding: 1em 0;
+    text-align: center;
+}
+
+.pure-table td,
+.pure-table th {
+    border-left: 1px solid #cbcbcb;
+    border-width: 0 0 0 1px;
+    font-size: inherit;
+    margin: 0;
+    overflow: visible;
+    padding: .5em 1em;
+}
+
+.pure-table thead {
+    background-color: #e0e0e0;
+    color: #000;
+    text-align: left;
+    vertical-align: bottom;
+}
+
+.pure-table td {
+    background-color: transparent;
+}
+
+.pure-table-odd td {
+    background-color: #f2f2f2;
 }
