@@ -1,7 +1,12 @@
 body {
     height: 100%;
-    /* font-family: 'Courier New', Courier, monospace; */
     font-size: 16px;
+
+    /* 禁止选择文本 */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 a {
