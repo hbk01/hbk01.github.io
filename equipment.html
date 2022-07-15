@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>设备信息</title>
+    <link rel="stylesheet" href="./github.css">
+    <link rel="stylesheet" href="./theme.css">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        var info = [
+            {
+                "where": "天平室",
+                "name": "天平",
+                "id": "CAQ-14-011",
+                "expir": "2023.04.17"
+            },
+            {
+                "where": "天平室",
+                "name": "天平",
+                "id": "CAQ-14-014",
+                "expir": "2023.07.10"
+            },
+        ];
+
+        $(document).ready(function () {
+            var content = document.getElementById("content");
+            var table = document.createElement("table");
+            table.setAttribute("style", "font-size: small; width: 100%;");
+            table.setAttribute("class", "pure-table");
+
+            // add header
+            var tr = document.createElement("tr");
+            var th_where = document.createElement("th");
+            var th_name = document.createElement("th");
+            var th_id = document.createElement("th");
+            var th_expir = document.createElement("th");
+
+            th_where.innerText = "位置";
+            th_name.innerText = "名称";
+            th_id.innerText = "编号";
+            th_expir.innerText = "有效期至";
+            tr.appendChild(th_where);
+            tr.appendChild(th_name);
+            tr.appendChild(th_id);
+            tr.appendChild(th_expir);
+            table.appendChild(tr);
+
+            // add contents
+            info.forEach(function (value) {
+                var tr = document.createElement("tr");
+                var td_where = document.createElement("td");
+                var td_name = document.createElement("td");
+                var td_id = document.createElement("td");
+                var td_expir = document.createElement("td");
+
+                td_where.innerText = value.where;
+                td_name.innerText = value.name;
+                td_id.innerText = value.id;
+                td_expir.innerText = value.expir;
+
+                tr.appendChild(td_where);
+                tr.appendChild(td_name);
+                tr.appendChild(td_id);
+                tr.appendChild(td_expir);
+                table.appendChild(tr);
+            });
+
+            content.appendChild(table);
+        });
+    </script>
+</head>
+
+<body>
+    <div id="content"></div>
+</body>
+
+</html>
