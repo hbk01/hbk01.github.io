@@ -129,15 +129,6 @@
             return time.toString();
         }
 
-        function messageAppend(message) {
-            output.innerHTML += message + "<br>";
-        }
-
-        function message(text) {
-            $("#output").empty();
-            $("#output").append(text + "<br>");
-        }
-
         // 为 Date 创建日期格式化方法
         Date.prototype.format = function (fmt) {
             var o = {
