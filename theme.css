@@ -26,6 +26,17 @@ a {
     border-left-width: 5px;
 }
 
+.item:active {
+    height: 32px;
+    text-align: left;
+    line-height: 32px;
+    margin-top: 5px;
+    padding-left: 10px;
+    background-color: #ffffff;
+    border: 1px solid #583fe9;
+    border-left-width: 5px;
+}
+
 .buttons {
     text-align: center;
 }
