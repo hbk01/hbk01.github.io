@@ -12,7 +12,25 @@
     <script src="./equipment.info.js"></script>
     <script>
         $(document).ready(function () {
+            createTable(info);
+            $("#keyword").attr("placeholder", "输入仪器名称或编号查询（忽略大小写）");
+            $("#search").click(() => {
+                var keyword = $("#keyword").val();
+                var temp = [];
+                info.filter(value => {
+                    if (value.name.includes(keyword) || value.id.toLowerCase().includes(keyword.toLowerCase())) {
+                        temp.push(value);
+                    }
+                });
+
+                createTable(temp);
+            });
+        });
+
+        // 根据data创建表格
+        function createTable(data) {
             var content = document.getElementById("content");
+            content.innerHTML = "";
             var table = document.createElement("table");
             table.setAttribute("style", "font-size: small; width: 100%;");
             table.setAttribute("class", "pure-table");
@@ -35,7 +53,7 @@
             table.appendChild(tr);
 
             // add contents
-            info.forEach(function (value) {
+            data.forEach(function (value) {
                 var tr = document.createElement("tr");
                 var td_where = document.createElement("td");
                 var td_name = document.createElement("td");
@@ -55,8 +73,9 @@
             });
 
             content.appendChild(table);
-        });
+        }
 
+        // 设置日期样式
         function expir(value) {
             var date = new Date();
             var array = value.split(".");
@@ -82,14 +101,15 @@
 </head>
 
 <body>
+    <input style="width: 80%;" type="text" id="keyword" placeholder="">
+    <button style="width: 15%;" id="search">搜索</button>
+    <div id="content"></div>
     <p>
         过期提醒：<br>
         <span style="color: darkorange;">黄色表示有效期剩余30天</span><br>
         <span style="color: red;">红色表示有效期剩余7天</span><br>
         <span style="color: red;"><s>红色加删除线表示已过期</s></span><br>
     </p>
-
-    <div id="content"></div>
 </body>
 
 </html>
