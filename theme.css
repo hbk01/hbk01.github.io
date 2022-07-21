@@ -53,6 +53,8 @@ input {
 button {
     height: 32px;
     width: 96px;
+    margin-top: 6px;
+    margin-left: 3px;
     text-align: center;
     background-color: #f6f8fa;
     color: #24292f;
