@@ -6,11 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="./github.css">
     <link rel="stylesheet" href="./theme.css">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        let url = "https://api.github.com/repos/hbk01/hbk01.github.io/commits?per_page=5";
+        $(document).ready(() => {
+            $.getJSON(url, data => {
+                data.forEach(element => {
+                    let message = element.commit.message.replace("\n", "<br>");
+                    if (message.startsWith("+")) {
+                        message = message.replace("+", "");
+                    }
+                    let time = element.commit.committer.date.slice(0, 10);
+                    $(".changelog").append("<li>" + time + ": " + message + "</li>");
+                });
+            });
+        });
+    </script>
     <title>QC TOOL</title>
 </head>
 
 <body>
     <div class="list">
+        <h4>功能列表</h4>
         <div class="item" onclick="window.location.href='./titer.html'">
             标水
         </div>
@@ -26,6 +43,14 @@
         <div class="item" onclick="window.location.href='./equipment.html'">
             设备信息
         </div>
+    </div>
+    <div class="about">
+        <h4>关于</h4>
+        <p>本项目开源于
+            <a href="https://github.com/hbk01/hbk01.github.io">Github</a> ，并由 <a href="https://docs.github.com/en/pages">Github Pages</a> 提供页面构建及部署服务。</p>
+    </div>
+    <div class="changelog">
+        <h4>变更日志</h4>
     </div>
 </body>
 
