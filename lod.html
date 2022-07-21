@@ -12,10 +12,11 @@
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         var debug = false;
+        var localStorageSupport = storageAvailable("localStorage");
         var tip = "<br>" +
             "操作过程：" +
             "<br>" +
-            "空瓶 -> 干燥3小时 -> 冷却称重(1) -> 干燥1小时 -> 冷却称重(2-1) -> 加样(2-2) -> 干燥3小时 -> 冷却称重(3) -> 干燥1小时 -> 冷却称重(4)" +
+            "空瓶 -> 干燥3小时 -> 冷却称重 -> 干燥1小时 -> 冷却称重(1) -> 加样(2) -> 干燥3小时 -> 冷却称重 -> 干燥1小时 -> 冷却称重(3)" +
             "<br>" +
             "<br>";
 
@@ -25,7 +26,6 @@
                 precision: 12
             }
         );
-
 
         $(document).ready(function () {
             var input_m0l = document.getElementById("m0l");
@@ -37,7 +37,16 @@
 
             $(".msgbox").append(tip)
 
-            loadSavedContentsList();
+            if (!localStorageSupport) {
+                $("#remove").hide();
+                $("#restore").hide();
+                $("#save").hide();
+                $("#lod-name").removeAttr("list");
+            }
+
+            if (localStorageSupport) {
+                loadSavedContentsList();
+            }
 
             $("#ok").click(function () {
                 var m0l = input_m0l.value;
@@ -76,8 +85,7 @@
             });
 
             $("#clear").click(function () {
-                var confirm = window.confirm("所填写的数据将被清空，确定？");
-                if (!confirm) {
+                if (!window.confirm("所填写的数据(不包括批号)将被清空，确定？")) {
                     return;
                 }
                 input_m0l.value = "";
@@ -94,77 +102,61 @@
                 window.open(window.location.href, "_blank");
             });
 
-            var timer;
-            var isSave = true;
-            $("#save_and_restore").bind("touchstart mousedown", event => {
-                event.preventDefault();
-                timer = setTimeout(() => {
-                    let save = $("#save");
-                    let restore = $("#restore");
-
-                    if (isSave) {
-                        save.removeAttr("style");
-                        restore.attr("style", "color: deepskyblue;");
-                    } else {
-                        restore.removeAttr("style");
-                        save.attr("style", "color: deepskyblue;");
-                    }
-                    isSave = !isSave;
-                }, 1000);
-            });
-
-            $("#save_and_restore").bind("touchmove mouseleave", event => {
-                event.preventDefault();
-                clearTimeout(timer);
-                timer = null;
-                return false;
-            });
-
-            $("#save_and_restore").bind("touchend mouseup", event => {
-                event.preventDefault();
-                clearTimeout(timer);
-                return false;
-            });
-
-            $("#save_and_restore").bind("click", event => {
-                event.preventDefault();
+            $("#save").click(() => {
                 let id = $("#lod-name").val();
-
                 if (id.length == 0) {
-                    alert("请输入或选择样品批号！");
+                    confirm("请输入或选择样品批号！");
                     return;
                 }
 
-                if (isSave) {
-                    // save data to localStorage
-                    let m0l = input_m0l.value;
-                    let m1l = input_m1l.value;
-                    let m3l = input_m3l.value;
-                    let m0r = input_m0r.value;
-                    let m1r = input_m1r.value;
-                    let m3r = input_m3r.value;
+                // save data to localStorage
+                let m0l = input_m0l.value;
+                let m1l = input_m1l.value;
+                let m3l = input_m3l.value;
+                let m0r = input_m0r.value;
+                let m1r = input_m1r.value;
+                let m3r = input_m3r.value;
 
-                    let lod = {
-                        "m0l": m0l,
-                        "m1l": m1l,
-                        "m3l": m3l,
-                        "m0r": m0r,
-                        "m1r": m1r,
-                        "m3r": m3r
-                    };
-                    localStorage.setItem(id, JSON.stringify(lod));
-                    loadSavedContentsList();
-                } else {
-                    let lod = JSON.parse(localStorage.getItem(id));
-                    input_m0l.value = lod.m0l;
-                    input_m1l.value = lod.m1l;
-                    input_m3l.value = lod.m3l;
-                    input_m0r.value = lod.m0r;
-                    input_m1r.value = lod.m1r;
-                    input_m3r.value = lod.m3r;
+                let lod = {
+                    "m0l": m0l,
+                    "m1l": m1l,
+                    "m3l": m3l,
+                    "m0r": m0r,
+                    "m1r": m1r,
+                    "m3r": m3r
+                };
+                localStorage.setItem(id, JSON.stringify(lod));
+                loadSavedContentsList();
+            });
+
+            $("#restore").click(() => {
+                let id = $("#lod-name").val();
+                if (id.length == 0) {
+                    confirm("请输入或选择样品批号！");
+                    return;
                 }
 
-            })
+                let lod = JSON.parse(localStorage.getItem(id));
+                input_m0l.value = lod.m0l;
+                input_m1l.value = lod.m1l;
+                input_m3l.value = lod.m3l;
+                input_m0r.value = lod.m0r;
+                input_m1r.value = lod.m1r;
+                input_m3r.value = lod.m3r;
+            });
+
+            $("#remove").click(() => {
+                let id = $("#lod-name").val();
+                if (id.length == 0) {
+                    confirm("请输入或选择样品批号！");
+                    return;
+                }
+                if (confirm("确认删除 " + id + " 的数据？")) {
+                    localStorage.removeItem(id);
+                    loadSavedContentsList();
+                    $("#lod-name").val("");
+                }
+            });
 
             if (debug) {
                 document.getElementById("m0l").value = 18.34625;
@@ -185,6 +177,32 @@
                 option.innerText = key;
                 $("#keys").append(option);
             });
+        }
+
+        // check storage available
+        function storageAvailable(type) {
+            let storage;
+            try {
+                storage = window[type];
+                const x = '__storage_test__';
+                storage.setItem(x, x);
+                storage.removeItem(x);
+                return true;
+            }
+            catch (e) {
+                return e instanceof DOMException && (
+                    // everything except Firefox
+                    e.code === 22 ||
+                    // Firefox
+                    e.code === 1014 ||
+                    // test name field too, because code might not be present
+                    // everything except Firefox
+                    e.name === 'QuotaExceededError' ||
+                    // Firefox
+                    e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+                    // acknowledge QuotaExceededError only if there's something already stored
+                    (storage && storage.length !== 0);
+            }
         }
 
         function message(msg) {
@@ -227,29 +245,30 @@
 
     <div class="one-team">
         第一组<br>
-        <input type="number" name="m0l" id="m0l" class="one-input m0" placeholder="恒重后空瓶重" inputmode="decimal"><br>
-        <input type="number" name="m1l" id="m1l" class="one-input m1" placeholder="样品重" inputmode="decimal"><br>
-        <input type="number" name="m3l" id="m3l" class="one-input m3" placeholder="干燥恒重后带样品重" inputmode="decimal"><br>
+        <input type="number" name="m0l" id="m0l" class="one-input m0" placeholder="恒重后空瓶重(1)" inputmode="decimal"><br>
+        <input type="number" name="m1l" id="m1l" class="one-input m1" placeholder="样品重(2)" inputmode="decimal"><br>
+        <input type="number" name="m3l" id="m3l" class="one-input m3" placeholder="干燥恒重后带样品重(3)"
+            inputmode="decimal"><br>
         <br>
     </div>
 
     <div class="two-team">
         第二组<br>
-        <input type="number" name="m0r" id="m0r" class="two-input m0" placeholder="恒重后空瓶重" inputmode="decimal"><br>
-        <input type="number" name="m1r" id="m1r" class="two-input m1" placeholder="样品重" inputmode="decimal"><br>
-        <input type="number" name="m3r" id="m3r" class="two-input m3" placeholder="干燥恒重后带样品重" inputmode="decimal"><br>
+        <input type="number" name="m0r" id="m0r" class="two-input m0" placeholder="恒重后空瓶重(1)" inputmode="decimal"><br>
+        <input type="number" name="m1r" id="m1r" class="two-input m1" placeholder="样品重(2)" inputmode="decimal"><br>
+        <input type="number" name="m3r" id="m3r" class="two-input m3" placeholder="干燥恒重后带样品重(3)"
+            inputmode="decimal"><br>
         <br>
     </div>
 
     <div class="buttons">
         <button id="new_page">新开标签页</button>
         <button id="clear">清除内容</button>
-        <button id="save_and_restore">
-            <span id="save" style="color: deepskyblue;">保存</span>
-            /
-            <span id="restore">恢复</span>
-        </button>
         <button id="ok">计算</button>
+        <br>
+        <button id="remove">删除</button>
+        <button id="restore">恢复</button>
+        <button id="save">保存</button>
     </div>
 
     <div class="msgbox"></div>
