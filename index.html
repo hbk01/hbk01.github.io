@@ -17,7 +17,7 @@
                         message = message.replace("+", "");
                     }
                     let time = element.commit.committer.date.slice(0, 10);
-                    $(".changelog").append("<li>" + time + ": " + message + "</li>");
+                    $(".changelog").append(time + ": " + message + "<br>");
                 });
             });
         });
