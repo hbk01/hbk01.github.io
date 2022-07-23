@@ -13,12 +13,23 @@
     <script>
         var debug = false;
         var localStorageSupport = storageAvailable("localStorage");
-        var tip = "<br>" +
-            "操作过程：" +
-            "<br>" +
-            "空瓶 -> 干燥3小时 -> 冷却称重 -> 干燥1小时 -> 冷却称重(1) -> 加样(2) -> 干燥3小时 -> 冷却称重 -> 干燥1小时 -> 冷却称重(3)" +
-            "<br>" +
-            "<br>";
+        var tip = `
+<br>
+操作过程：
+<br>
+空瓶 -> 干燥3小时 -> 冷却称重 -> 干燥1小时 -> 冷却称重(1) -> 加样(2) -> 干燥3小时 -> 冷却称重 -> 干燥1小时 -> 冷却称重(3)
+<br>
+<br>
+记录保存功能使用方法：
+<br>
+保存：输入样品批号，点击保存，此时第一组及第二组输入框内的数据将被存储。
+<br>
+恢复：输入或选择样品批号，点击恢复，此时将读取对应数据并自动填入输入框。
+<br>
+删除：输入或选择样品批号，点击删除，此时将从已存储的数据中删除对应数据。
+<br>
+若保存、恢复、删除按钮均未显示，则表明您的浏览器不支持此功能。
+`;
 
         var decimal = Decimal.set(
             {
@@ -264,8 +275,8 @@
     <div class="buttons">
         <button id="new_page">新开标签页</button>
         <button id="clear">清除内容</button>
-        <button id="ok">计算</button>
-        <br>
+        <button id="ok">计算</button><br>
+
         <button id="remove">删除</button>
         <button id="restore">恢复</button>
         <button id="save">保存</button>
