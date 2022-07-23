@@ -13,12 +13,19 @@
     <script>
         $(document).ready(function () {
             createTable(info);
-            $("#keyword").attr("placeholder", "输入仪器名称或编号查询（忽略大小写）");
+            $("#keyword").attr("placeholder", "输入查询关键字（忽略大小写）");
             $("#search").click(() => {
                 var keyword = $("#keyword").val();
+                if (keyword == "") {
+                    createTable(info);
+                    return;
+                }
                 var temp = [];
                 info.filter(value => {
-                    if (value.name.includes(keyword) || value.id.toLowerCase().includes(keyword.toLowerCase())) {
+                    if (value.id.toLowerCase().includes(keyword.toLowerCase()) ||
+                        value.name.includes(keyword) ||
+                        value.where.includes(keyword) ||
+                        value.expir.includes(keyword)) {
                         temp.push(value);
                     }
                 });
@@ -73,6 +80,9 @@
             });
 
             content.appendChild(table);
+            let num = document.createElement("span");
+            num.innerText = "共 " + data.length + " 条记录";
+            content.appendChild(num);
         }
 
         // 设置日期样式
@@ -102,7 +112,7 @@
 
 <body>
     <input style="width: 80%;" type="text" id="keyword" placeholder="">
-    <button style="width: 15%;" id="search">搜索</button>
+    <button style="width: 15%;" id="search" type="submit">搜索</button>
     <div id="content"></div>
     <p>
         过期提醒：<br>
