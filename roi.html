@@ -12,15 +12,13 @@
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         var debug = false;
-        var tip = "<br>" +
-            "操作过程：" +
-            "<br>" +
-            "空坩埚 -> 灼烧3小时 -> 冷却称重(1) -> 灼烧0.5小时 -> 冷却称重(2-1) -> 加样(2-2) -> 烧至无烟 -> 灼烧1小时 -> 冷却称重(3) -> 灼烧0.5小时 -> 冷却称重(4)" +
-            "<br>" +
-            "<br>" +
-            "m0=恒重后空坩埚重（2-1）<br>" +
-            "m1=样品重（2-2）<br>" +
-            "m3=灼烧恒重后带样品重（4）";
+        var tip = `
+<br>
+操作过程：
+空坩埚 -> 灼烧3小时 -> 冷却称重 -> 灼烧0.5小时 -> 冷却称重(1) -> 加样(2) -> 烧至无烟 -> 灼烧1小时 -> 冷却称重 -> 灼烧0.5小时 -> 冷却称重(3)
+<br>
+<br>
+`;
 
         var decimal = Decimal.set(
             {
@@ -53,10 +51,15 @@
                 var lod2 = lod(m0r, m1r, m3r)
                 var average = decimal.add(lod1, lod2).div(2).toString();
 
-                var msg = "<br>" +
-                    "第一组炽灼残渣 = " + lod1 + "<br>" +
-                    "第二组炽灼残渣 = " + lod2 + "<br>" +
-                    "两组炽灼残渣平均值 = " + average + "<br>";
+                var msg = `
+<br>
+第一组炽灼残渣 = ${lod1 <= 0 ? '<span style="color: red;">' + lod1 + '</span>' : lod1}
+<br>
+第二组炽灼残渣 = ${lod2 <= 0 ? '<span style="color: red;">' + lod2 + '</span>' : lod2}
+<br>
+两组炽灼残渣平均值 = ${average <= 0 ? '<span style="color: red;">' + average + '</span>' : average}
+<br>
+`;
 
                 if (m0l != '' && m1l != '') {
                     msg += "第一组恒重后空坩埚+样 = " + decimal.add(m0l, m1l).toString() + "<br>";
@@ -70,7 +73,7 @@
             });
 
             $("#clear").click(function () {
-                var confirm = window.confirm("所填写的数据将被清空，确定？");
+                var confirm = window.confirm("所填写的数据(不包括批号)将被清空，确定？");
                 if (!confirm) {
                     return;
                 }
@@ -135,17 +138,19 @@
 
     <div class="one-team">
         第一组<br>
-        <input type="number" name="m0l" id="m0l" class="one-input m0" placeholder="m0" inputmode="decimal"><br>
-        <input type="number" name="m1l" id="m1l" class="one-input m1" placeholder="m1" inputmode="decimal"><br>
-        <input type="number" name="m3l" id="m3l" class="one-input m3" placeholder="m3" inputmode="decimal"><br>
+        <input type="number" name="m0l" id="m0l" class="one-input m0" placeholder="恒重后空坩埚重(1)" inputmode="decimal"><br>
+        <input type="number" name="m1l" id="m1l" class="one-input m1" placeholder="样品重(2)" inputmode="decimal"><br>
+        <input type="number" name="m3l" id="m3l" class="one-input m3" placeholder="灼烧恒重后带样品重(3)"
+            inputmode="decimal"><br>
         <br>
     </div>
 
     <div class="two-team">
         第二组<br>
-        <input type="number" name="m0r" id="m0r" class="two-input m0" placeholder="m0" inputmode="decimal"><br>
-        <input type="number" name="m1r" id="m1r" class="two-input m1" placeholder="m1" inputmode="decimal"><br>
-        <input type="number" name="m3r" id="m3r" class="two-input m3" placeholder="m3" inputmode="decimal"><br>
+        <input type="number" name="m0r" id="m0r" class="two-input m0" placeholder="恒重后空坩埚重(1)" inputmode="decimal"><br>
+        <input type="number" name="m1r" id="m1r" class="two-input m1" placeholder="样品重(2)" inputmode="decimal"><br>
+        <input type="number" name="m3r" id="m3r" class="two-input m3" placeholder="灼烧恒重后带样品重(3)"
+            inputmode="decimal"><br>
         <br>
     </div>
 
