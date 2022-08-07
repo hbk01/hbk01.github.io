@@ -9,7 +9,39 @@
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         let url = "https://api.github.com/repos/hbk01/hbk01.github.io/commits?per_page=5";
+
+        let functions = [
+            {
+                "name": "标水",
+                "location": "./titer.html"
+            },
+            {
+                "name": "干燥失重",
+                "location": "./lod.html"
+            },
+            {
+                "name": "炽灼残渣",
+                "location": "./roi.html"
+            },
+            {
+                "name": "进样序列",
+                "location": "./injection-sequence.html"
+            },
+            {
+                "name": "设备信息",
+                "location": "./equipment.html"
+            }
+        ];
+
         $(document).ready(() => {
+
+            // 加载功能列表
+            functions.forEach(value => {
+                let div = `<div class="item" onclick="window.location.href='${value.location}'">${value.name}</div>`;
+                $(".list").append(div);
+            });
+
+            // 加载最近的 commit 记录
             $.getJSON(url, data => {
                 data.forEach(element => {
                     let message = element.commit.message.replace("\n", "<br>");
@@ -17,7 +49,7 @@
                         message = message.replace("+", "");
                     }
                     let time = element.commit.committer.date.slice(0, 10);
-                    $(".changelog").append(time + ": " + message + "<br>");
+                    $(".changelog").append(`${time}: ${message}<br>`);
                 });
             });
         });
@@ -26,32 +58,16 @@
 </head>
 
 <body>
-    <div class="list">
-        <h4>功能列表</h4>
-        <div class="item" onclick="window.location.href='./titer.html'">
-            标水
-        </div>
-        <div class="item" onclick="window.location.href='./lod.html'">
-            干燥失重
-        </div>
-        <div class="item" onclick="window.location.href='./roi.html'">
-            炽灼残渣
-        </div>
-        <div class="item" onclick="window.location.href='./injection-sequence.html'">
-            进样序列
-        </div>
-        <div class="item" onclick="window.location.href='./equipment.html'">
-            设备信息
-        </div>
-    </div>
+    <h4>功能列表</h4>
+    <div class="list"></div>
+    <h4>关于</h4>
     <div class="about">
-        <h4>关于</h4>
-        <p>本项目开源于
-            <a href="https://github.com/hbk01/hbk01.github.io">Github</a> ，并由 <a href="https://docs.github.com/en/pages">Github Pages</a> 提供页面构建及部署服务。</p>
+        本项目开源于
+        <a href="https://github.com/hbk01/hbk01.github.io">Github</a> ，并由
+        <a href="https://docs.github.com/en/pages">Github Pages</a> 提供页面构建及部署服务。
     </div>
-    <div class="changelog">
-        <h4>变更日志</h4>
-    </div>
+    <h4>变更日志</h4>
+    <div class="changelog"></div>
 </body>
 
 </html>
