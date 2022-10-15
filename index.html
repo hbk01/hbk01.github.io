@@ -53,11 +53,11 @@
                 let color2 = getRandomColor()
                 let changeColor = false
                 data.forEach(element => {
-                    let message = element.commit.message.replace("\n", "<br>");
+                    let message = element.commit.message.replaceAll("\n", "<br>");
                     if (message.startsWith("+")) {
                         message = message.replace("+", "<br>&nbsp;&nbsp;&bull;");
                     }
-                    message = message.replace("+", "&nbsp;&nbsp;&bull;")
+                    message = message.replaceAll("+", "&nbsp;&nbsp;&bull;")
                     let time = element.commit.committer.date.slice(0, 10);
                     changeColor = !changeColor
                     let msg = `<span style="color: ${changeColor ? color1 : color2}">${time}: ${message}</span><br>`
