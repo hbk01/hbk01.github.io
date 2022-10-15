@@ -124,7 +124,7 @@
 
         function setCheckInputEvent() {
             let checkInput = (event) => {
-                event.target.value = event.target.value.replace(/[0-9]/g, '')
+                event.target.value = event.target.value.replace(/[\D]/g, '')
             }
             $("#one-all").on("input", checkInput)
             $("#one-414-3").on("input", checkInput)
