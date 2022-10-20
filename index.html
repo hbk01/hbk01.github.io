@@ -38,9 +38,7 @@
         ];
 
         $(document).ready(() => {
-
-            var getRandomColor = () => '#' + (Math.random() * 0xffffff << 0).toString(16)
-
+            // var getRandomColor = () => '#' + (Math.random() * 0xffffff << 0).toString(16)
             // 加载功能列表
             functions.forEach(value => {
                 let div = `<div class="item" onclick="window.location.href='${value.location}'">${value.name}</div>`;
@@ -49,18 +47,28 @@
 
             // 加载最近的 commit 记录
             $.getJSON(url, data => {
-                let color1 = getRandomColor()
-                let color2 = getRandomColor()
+                let color1 = '#f9f9f9'
+                let color2 = '#f3f3f3'
                 let changeColor = false
                 data.forEach(element => {
+                    let hash = element.sha.slice(0, 7)
+                    let verified = element.commit.verification.verified
+
+                    // 处理换行和+号
                     let message = element.commit.message.replaceAll("\n", "<br>");
                     if (message.startsWith("+")) {
-                        message = message.replace("+", "<br>&nbsp;&nbsp;&bull;");
+                        message = message.replace("+", "<br>&nbsp;&nbsp;<strong>&bull;</strong>");
                     }
-                    message = message.replaceAll("+", "&nbsp;&nbsp;&bull;")
-                    let time = element.commit.committer.date.slice(0, 10);
+                    message = message.replaceAll("+", "&nbsp;&nbsp;<strong>&bull;</strong>")
+
+                    let date = new Date(element.commit.committer.date) // "2022-10-08T10:54:36Z"
+                    date = new Date(+ new Date(date) + 28800000).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
+
                     changeColor = !changeColor
-                    let msg = `<span style="color: ${changeColor ? color1 : color2}">${time}: ${message}</span><br>`
+                    let msg = `
+                    <div style="background-color: ${changeColor ? color1 : color2}; padding: 5px 0px 5px 10px">
+                        ${date} (${hash}${verified ? ", <span style='color: green'><strong>Verified</strong></span>" : ""}) ${message}
+                    </div>`
                     $(".changelog").append(msg);
                 });
             });
@@ -80,7 +88,7 @@
         <a href="https://docs.github.com/en/pages">Github Pages</a> 提供页面构建及部署服务。
     </div>
     <h4>变更日志</h4>
-    <div class="changelog"></div>
+    <div class="changelog" style="width: 100%;"></div>
 </body>
 
 </html>
