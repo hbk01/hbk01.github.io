@@ -34,6 +34,10 @@
             {
                 "name": "L414-5KR 相关物质计算",
                 "location": "./L414-5KR-impurities.html"
+            },
+            {
+                "name": "L014-1 相关物质计算",
+                "location": "./L014-1-impurities.html"
             }
         ];
 
@@ -53,6 +57,7 @@
                 data.forEach(element => {
                     let hash = element.sha.slice(0, 7)
                     let verified = element.commit.verification.verified
+                    let html_url = element.html_url
 
                     // 处理换行和+号
                     let message = element.commit.message.replaceAll("\n", "<br>");
@@ -65,9 +70,14 @@
                     date = new Date(+ new Date(date) + 28800000).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
 
                     changeColor = !changeColor
+                    let header = `
+                    ${date}
+                    (<a href='${html_url}'>${hash}</a>${verified ? ", <span style='color: green'><strong>Verified</strong></span>" : ""})`
+
                     let msg = `
                     <div style="background-color: ${changeColor ? color1 : color2}; padding: 5px 0px 5px 10px">
-                        ${date} (${hash}${verified ? ", <span style='color: green'><strong>Verified</strong></span>" : ""}) ${message}
+                        ${header}
+                        ${message}
                     </div>`
                     $(".changelog").append(msg);
                 });
