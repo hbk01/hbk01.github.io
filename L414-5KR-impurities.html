@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>L414-5KR 相关物质计算</title>
+    <title>L414-5KR 相关物质</title>
     <link rel="stylesheet" href="./github.css">
     <link rel="stylesheet" href="./theme.css">
     <script src="./decimal.js"></script>
@@ -69,6 +69,7 @@
                 two_414_5.val("")
                 $("#msgbox").empty()
                 $("#msgbox").html(tips)
+                $("#table").hide()
             })
             $("#ok").click(() => {
                 let one_414_3_cf = correctionFactor(one_414_3.val(), one_all.val(), F_L414_3)
@@ -89,38 +90,63 @@
                     two_414_5_im.val(), two_414_5_im_cf
                 )
 
+                let one_purity = decimal.sub(100, one_total_impurities).toFixed(PRECISION)
+                let two_purity = decimal.sub(100, two_total_impurities).toFixed(PRECISION)
+
+                let data = {
+                    "one": {
+                        "L414_3": format(one_414_3_cf, MAX_L414_3),
+                        "L414_5_IM": format(one_414_5_im_cf, MAX_L414_5_IM),
+                        "impurities": format(one_total_impurities, MAX_TOTAL_IMPURITIES),
+                        "purity": format(one_purity, MIN_PURITY, true)
+                    },
+                    "two": {
+                        "L414_3": format(two_414_3_cf, MAX_L414_3),
+                        "L414_5_IM": format(two_414_5_im_cf, MAX_L414_5_IM),
+                        "impurities": format(two_total_impurities, MAX_TOTAL_IMPURITIES),
+                        "purity": format(two_purity, MIN_PURITY, true)
+                    },
+                    "average": {
+                        "L414_3": format(average(one_414_3_cf, two_414_3_cf), MAX_L414_3),
+                        "L414_5_IM": format(average(one_414_5_im_cf, two_414_5_im_cf), MAX_L414_5_IM),
+                        "impurities": format(average(one_total_impurities, two_total_impurities), MAX_TOTAL_IMPURITIES),
+                        "purity": format(average(one_purity, two_purity, 1), MIN_PURITY, true)
+                    }
+                }
+
+                $("#table").show()
+                generateTable(data)
+
                 let msg = `
-                第一组结果: <br>
-                L414-3: ${format(one_414_3_cf, MAX_L414_3)} <br>
-                L414-5-IM: ${format(one_414_5_im_cf, MAX_L414_5_IM)} <br>
-                总杂: ${format(one_total_impurities, MAX_TOTAL_IMPURITIES)} <br>
-                纯度: ${format(decimal.sub(100, one_total_impurities), MIN_PURITY, true)} <br>
-
-                <br>
-                第二组结果: <br>
-                L414-3: ${format(two_414_3_cf, MAX_L414_3)} <br>
-                L414-5-IM: ${format(two_414_5_im_cf, MAX_L414_5_IM)} <br>
-                总杂: ${format(two_total_impurities, MAX_TOTAL_IMPURITIES)} <br>
-                纯度: ${format(decimal.sub(100, two_total_impurities), MIN_PURITY, true)} <br>
-
-                <br>
-                平均值: <br>
-                L414-3: ${format(average(one_414_3_cf, two_414_3_cf), MAX_L414_3)} <br>
-                L414-5-IM: ${format(average(one_414_5_im_cf, two_414_5_im_cf), MAX_L414_5_IM)} <br>
-                总杂: ${format(average(one_total_impurities, two_total_impurities), MAX_TOTAL_IMPURITIES)} <br>
-                纯度: ${format(average(decimal.sub(100, one_total_impurities), decimal.sub(100, two_total_impurities), 1), MIN_PURITY, true)} <br>
-
-                <br>
                 操规允许: <br>
                 L414-3 &le; ${MAX_L414_3}% <br>
                 L414-5-IM &le; ${MAX_L414_5_IM.toPrecision(2)}% <br>
                 总杂 &le; ${MAX_TOTAL_IMPURITIES.toPrecision(2)}% <br>
                 纯度 &ge; ${MIN_PURITY}% <br>
                 `
-
                 $("#msgbox").html(msg)
             })
         })
+
+        /**
+         * 将结果输出到表格中
+         */
+        function generateTable(data) {
+            $("#L414-3>#one").html(data.one.L414_3)
+            $("#L414-5-IM>#one").html(data.one.L414_5_IM)
+            $("#impurities>#one").html(data.one.impurities)
+            $("#purity>#one").html(data.one.purity)
+
+            $("#L414-3>#two").html(data.two.L414_3)
+            $("#L414-5-IM>#two").html(data.two.L414_5_IM)
+            $("#impurities>#two").html(data.two.impurities)
+            $("#purity>#two").html(data.two.purity)
+
+            $("#L414-3>#average").html(data.average.L414_3)
+            $("#L414-5-IM>#average").html(data.average.L414_5_IM)
+            $("#impurities>#average").html(data.average.impurities)
+            $("#purity>#average").html(data.average.purity)
+        }
 
         function setCheckInputEvent() {
             let checkInput = (event) => {
@@ -160,12 +186,12 @@
         }
 
         function format(value, max, morethen = false) {
-            let red_value = `<span style='color: red;'>${value}%</span>`
+            let red_value = `<span style='color: red;'>${value}</span>`
             if (value == 0) return "ND"
             if (value < 0) return red_value
             if (!morethen && value >= max) return red_value
             if (morethen && value <= max) return red_value
-            return `${value}%`
+            return `${value}`
         }
 
         /**
@@ -178,7 +204,7 @@
 </head>
 
 <body>
-    <h3>L414-5KR 相关物质计算</h3>
+    <h3>L414-5KR 相关物质</h3>
     <div class="one">
         第一组<br>
         <input type="number" name="one-414-3" id="one-414-3" , placeholder="L414-3 峰面积" inputmode="numeric">
@@ -204,6 +230,39 @@
     </div>
 
     <br>
+    <table id="table" style="font-size: small; width: 100%; text-align: center; display: none;">
+        <caption>计算结果</caption>
+        <tr>
+            <th scope="col">/</th>
+            <th scope="col">第一组(%)</th>
+            <th scope="col">第二组(%)</th>
+            <th scope="col">平均值(%)</th>
+        </tr>
+        <tr id="L414-3">
+            <th scope="row">L414-3</th>
+            <td id="one"></td>
+            <td id="two"></td>
+            <td id="average"></td>
+        </tr>
+        <tr id="L414-5-IM">
+            <th scope="row">L414-5-IM</th>
+            <td id="one"></td>
+            <td id="two"></td>
+            <td id="average"></td>
+        </tr>
+        <tr id="impurities">
+            <th scope="row">总杂</th>
+            <td id="one"></td>
+            <td id="two"></td>
+            <td id="average"></td>
+        </tr>
+        <tr id="purity">
+            <th scope="row">纯度</th>
+            <td id="one"></td>
+            <td id="two"></td>
+            <td id="average"></td>
+        </tr>
+    </table>
     <div id="msgbox"></div>
 </body>
 
