@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh_CN">
+<html lang="zh-cmn-Hans">
 
 <head>
     <meta charset="UTF-8">
@@ -10,97 +10,114 @@
     <link rel="stylesheet" href="./theme.css">
     <script src="./decimal.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script>
-        var debug = false;
-        var tip = `
+    <script type="module">
+        import { IO } from './modules/tools.js'
+
+        let io = new IO('roi')
+        let decimal = Decimal.set({
+            rounding: Decimal.ROUND_HALF_EVEN,
+            precision: 12
+        })
+        let debug = false
+
+        let tip = `
 <br>
 操作过程：
-空坩埚 -> 灼烧3小时 -> 冷却称重 -> 灼烧0.5小时 -> 冷却称重(1) -> 加样(2) -> 烧至无烟 -> 灼烧1小时 -> 冷却称重 -> 灼烧0.5小时 -> 冷却称重(3)
+空坩埚 -> 灼烧3小时 -> 冷却称重 -> 灼烧0.5小时 -> 冷却称重(1)
+-> 加样(2) -> 烧至无烟 -> 灼烧1小时 -> 冷却称重 -> 灼烧0.5小时 -> 冷却称重(3)
 <br>
-<br>
-`;
+`
 
-        var decimal = Decimal.set(
-            {
-                rounding: Decimal.ROUND_HALF_EVEN,
-                precision: 12
-            }
-        );
-
-
-        $(document).ready(function () {
-            var input_m0l = document.getElementById("m0l");
-            var input_m1l = document.getElementById("m1l");
-            var input_m3l = document.getElementById("m3l");
-            var input_m0r = document.getElementById("m0r");
-            var input_m1r = document.getElementById("m1r");
-            var input_m3r = document.getElementById("m3r");
-
+        $(document).ready(() => {
             $(".msgbox").append(tip)
+            loadSavedContentsList()
 
-            $("#ok").click(function () {
-                var m0l = input_m0l.value;
-                var m1l = input_m1l.value;
-                var m3l = input_m3l.value;
+            $("#ok").click(() => {
+                let m0l = $("#m0l").val()
+                let m1l = $("#m1l").val()
+                let m3l = $("#m3l").val()
+                let m0r = $("#m0r").val()
+                let m1r = $("#m1r").val()
+                let m3r = $("#m3r").val()
 
-                var m0r = input_m0r.value;
-                var m1r = input_m1r.value;
-                var m3r = input_m3r.value;
+                let lod1 = roi(m0l, m1l, m3l)
+                let lod2 = roi(m0r, m1r, m3r)
+                let average = decimal.add(lod1, lod2).div(2).toString()
 
-                var lod1 = lod(m0l, m1l, m3l)
-                var lod2 = lod(m0r, m1r, m3r)
-                var average = decimal.add(lod1, lod2).div(2).toString();
-
-                var msg = `
-<br>
-第一组炽灼残渣 = ${lod1 <= 0 ? '<span style="color: red;">' + lod1 + '</span>' : lod1}
-<br>
-第二组炽灼残渣 = ${lod2 <= 0 ? '<span style="color: red;">' + lod2 + '</span>' : lod2}
-<br>
-两组炽灼残渣平均值 = ${average <= 0 ? '<span style="color: red;">' + average + '</span>' : average}
-<br>
-`;
-
-                if (m0l != '' && m1l != '') {
-                    msg += "第一组恒重后空坩埚+样 = " + decimal.add(m0l, m1l).toString() + "<br>";
+                let format = (value) => {
+                    if (value <= 0) return `<span style="color: red;">${value}</span>`
+                    return value
                 }
 
-                if (m0r != '' && m1r != '') {
-                    msg += "第二组恒重后空坩埚+样 = " + decimal.add(m0r, m1r).toString() + "<br>";
+                let msg = `
+                <br> 第一组炽灼残渣 = ${format(lod1)}
+                <br> 第二组炽灼残渣 = ${format(lod2)}
+                <br> 两组炽灼残渣平均值 = ${format(average)}
+                <br> 第一组恒重后空坩埚+样 = ${checkNull(m0l, m1l, '0') ? '0' : decimal.add(m0l, m1l).toString()}
+                <br> 第二组恒重后空坩埚+样 = ${checkNull(m0r, m1r, '0') ? '0' : decimal.add(m0r, m1r).toString()}
+`
+                message(msg)
+            })
+
+            $("#clear").click(() => {
+                if (!window.confirm("所填写的数据将被清空，确定？")) return
+
+                $("#roi-name").val('')
+                $("#m0l").val('')
+                $("#m1l").val('')
+                $("#m3l").val('')
+                $("#m0r").val('')
+                $("#m1r").val('')
+                $("#m3r").val('')
+                message(tip)
+            })
+
+            $("#new_page").click(() => {
+                window.open(window.location.href, "_blank")
+            })
+
+            $("#remove").click(() => {
+                let id = $("#roi-name").val()
+                if (id.length == 0) {
+                    confirm("请输入或选择样品批号！")
+                    return
                 }
+                io.remove(id)
+                loadSavedContentsList()
+            })
 
-                message(msg);
-            });
-
-            $("#clear").click(function () {
-                var confirm = window.confirm("所填写的数据(不包括批号)将被清空，确定？");
-                if (!confirm) {
-                    return;
+            $("#restore").click(() => {
+                let id = $("#roi-name").val()
+                if (id.length == 0) {
+                    confirm("请输入或选择样品批号！")
+                    return
                 }
-                input_m0l.value = "";
-                input_m1l.value = "";
-                input_m3l.value = "";
-                input_m0r.value = "";
-                input_m1r.value = "";
-                input_m3r.value = "";
+                let data = io.read(id)
+                let roi = JSON.parse(data)
+                importData(roi)
+            })
 
-                message(tip);
-            });
-
-            $("#new_page").click(function () {
-                window.open(window.location.href, "_blank");
-            });
+            $("#save").click(() => {
+                let id = $("#roi-name").val()
+                if (id.length == 0) {
+                    confirm("请输入或选择样品批号！")
+                    return
+                }
+                let data = JSON.stringify(exportData())
+                io.write(id, data)
+                loadSavedContentsList()
+            })
 
             if (debug) {
-                document.getElementById("m0l").value = 18.34625;
-                document.getElementById("m1l").value = 1.04213;
-                document.getElementById("m3l").value = 19.38511;
+                document.getElementById("m0l").value = 18.34625
+                document.getElementById("m1l").value = 1.04213
+                document.getElementById("m3l").value = 19.38511
             }
-        });
+        })
 
         function message(msg) {
-            $(".msgbox").empty();
-            $(".msgbox").append(msg);
+            $(".msgbox").empty()
+            $(".msgbox").append(msg)
         }
 
         /**
@@ -110,31 +127,87 @@
          * @param m3 干燥恒重后带样品重
          * @return 炽灼残渣（%）
          */
-        function lod(m0, m1, m3) {
-            if (checkNull(m0, m1, m3)) {
-                return "0";
-            }
+        function roi(m0, m1, m3) {
+            if (checkNull(m0, m1, m3)) return "0"
 
-            var a = new Decimal(m0);
-            var b = new Decimal(m1);
-            var c = new Decimal(m3);
+            let a = new Decimal(m0)
+            let b = new Decimal(m1)
+            let c = new Decimal(m3)
 
             // m3 - m0 / m1 * 100
-            var d = decimal.sub(c, a)
-            var e = d.div(b).mul(100);
-            return e.toString();
+            let d = decimal.sub(c, a)
+            let e = d.div(b).mul(100)
+            return e.toString()
         }
 
         function checkNull(m0, m1, m3) {
-            return m0 == '' || m1 == '' || m3 == '';
+            return m0 == '' || m1 == '' || m3 == ''
         }
 
+        function loadSavedContentsList() {
+            // load data from localStorage to input.
+            let keys = io.listKeys()
+            keys.forEach(key => {
+                let timestamp = JSON.parse(io.read(key)).time
+                let time = new Date(timestamp).format("yyyy-MM-dd hh:mm")
+                let option = document.createElement("option")
+                $(option).attr("value", key)
+                $(option).attr("label", `保存于 ${time}`)
+                $("#keys").append(option)
+            })
+        }
+
+        // 为 Date 创建日期格式化方法
+        Date.prototype.format = function (fmt) {
+            let o = {
+                "M+": this.getMonth() + 1,                      //月份
+                "d+": this.getDate(),                           //日
+                "h+": this.getHours(),                          //小时
+                "m+": this.getMinutes(),                        //分
+                "s+": this.getSeconds(),                        //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3),    //季度
+                "S": this.getMilliseconds()                     //毫秒
+            }
+            if (/(y+)/.test(fmt)) {
+                fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length))
+            }
+            for (var k in o) {
+                if (new RegExp("(" + k + ")").test(fmt)) {
+                    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)))
+                }
+            }
+            return fmt
+        }
+
+        function importData(data) {
+            $("#roi-name").val(data.id)
+            $("#m0l").val(data.m0l)
+            $("#m1l").val(data.m1l)
+            $("#m3l").val(data.m3l)
+            $("#m0r").val(data.m0r)
+            $("#m1r").val(data.m1r)
+            $("#m3r").val(data.m3r)
+        }
+
+        function exportData() {
+            let data = {
+                "time": Date.now(),
+                "id": $("#roi-name").val(),
+                "m0l": $("#m0l").val(),
+                "m1l": $("#m1l").val(),
+                "m3l": $("#m3l").val(),
+                "m0r": $("#m0r").val(),
+                "m1r": $("#m1r").val(),
+                "m3r": $("#m3r").val(),
+            }
+            return data
+        }
     </script>
 </head>
 
 <body>
     <h3>炽灼残渣</h3>
-    <input type="text" name="lod-name" id="lod-name" placeholder="样品批号"><br><br>
+    <input type="text" name="roi-name" id="roi-name" list="keys" placeholder="样品批号"><br><br>
 
     <div class="one-team">
         第一组<br>
@@ -158,9 +231,14 @@
         <button id="new_page">新开标签页</button>
         <button id="clear">清除内容</button>
         <button id="ok">计算</button>
+
+        <button id="remove">删除</button>
+        <button id="restore">恢复</button>
+        <button id="save">保存</button>
     </div>
 
     <div class="msgbox"></div>
+    <datalist id="keys"></datalist>
 
 </body>
 

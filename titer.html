@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh_CN">
+<html lang="zh-cmn-Hans">
 
 <head>
     <meta charset="UTF-8">
@@ -11,67 +11,58 @@
     <script src="./decimal.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
-        var debug = false;
-        var tip = "<br>" +
-            "请输入三次 F 值" +
-            "<br>" +
-            "公式：" +
-            "<br>" +
-            "F' = AVERAGE(F1, F2, F3)" + "<br>" +
-            "RDx = [ Fx - F' ] / F' * 100";
-        var decimal = Decimal.set(
-            {
-                rounding: Decimal.ROUND_HALF_EVEN,
-                precision: 12
-            }
-        );
+        let debug = false
+        let tip = `<br>
+        请输入三次 F 值<br>
+        公式：<br>
+        F' = AVERAGE(F1, F2, F3)<br>
+        RDx = [ Fx - F' ] / F' * 100`
 
+        let decimal = Decimal.set({
+            rounding: Decimal.ROUND_HALF_EVEN,
+            precision: 12
+        })
 
-        $(document).ready(function () {
-            var input_m0 = document.getElementById("m0");
-            var input_m1 = document.getElementById("m1");
-            var input_m2 = document.getElementById("m2");
-
+        $(document).ready(() => {
             $(".msgbox").append(tip)
 
-            $("#ok").click(function () {
-                var m0 = input_m0.value;
-                var m1 = input_m1.value;
-                var m2 = input_m2.value;
+            $("#ok").click(() => {
+                let m0 = $("#m0").val()
+                let m1 = $("#m1").val()
+                let m2 = $("#m2").val()
+                f = average(m0, m1, m2)
 
-                f = average(m0, m1, m2);
+                let msg = `
+                    <br>
+                    F值平均值 = ${f}<br>
+                    RD1 = ${titer(f, m0)}<br>
+                    RD2 = ${titer(f, m1)}<br>
+                    RD3 = ${titer(f, m2)}<br>
+                `
+                message(msg)
+            })
 
-                var msg = "<br>" +
-                    "F值平均值 = " + f + "<br>" +
-                    "RD1 = " + titer(f, m0) + "<br>" +
-                    "RD2 = " + titer(f, m1) + "<br>" +
-                    "RD3 = " + titer(f, m2) + "<br>";
+            $("#clear").click(() => {
+                $("#m0").val("")
+                $("#m1").val("")
+                $("#m2").val("")
+                message(tip)
+            })
 
-                message(msg);
-            });
-
-            $("#clear").click(function () {
-                input_m0.value = "";
-                input_m1.value = "";
-                input_m2.value = "";
-
-                message(tip);
-            });
-
-            $("#new_page").click(function () {
-                window.open(window.location.href, "_blank");
-            });
+            $("#new_page").click(() => {
+                window.open(window.location.href, "_blank")
+            })
 
             if (debug) {
-                document.getElementById("m0").value = 2;
-                document.getElementById("m1").value = 3;
-                document.getElementById("m2").value = 4;
+                $("#m0").val(2)
+                $("#m1").val(3)
+                $("#m2").val(4)
             }
-        });
+        })
 
         function message(msg) {
-            $(".msgbox").empty();
-            $(".msgbox").append(msg);
+            $(".msgbox").empty()
+            $(".msgbox").append(msg)
         }
 
         /**
@@ -81,16 +72,16 @@
          */
         function titer(f, m) {
             temp = decimal.sub(m, f)
-            return temp.div(f).mul(100);
+            return temp.div(f).mul(100)
         }
 
         function average(a, b, c) {
-            var sum = Decimal(a).add(Decimal(b)).add(Decimal(c));
-            return decimal.div(sum, 3);
+            let sum = Decimal(a).add(Decimal(b)).add(Decimal(c))
+            return decimal.div(sum, 3)
         }
 
         function checkNull(m0, m1, m2) {
-            return m0 == '' || m1 == '' || m2 == '';
+            return m0 == '' || m1 == '' || m2 == ''
         }
 
     </script>

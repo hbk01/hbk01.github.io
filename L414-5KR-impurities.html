@@ -11,27 +11,27 @@
     <script src="./decimal.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
-        var debug = false
+        let debug = false
 
         // 校正因子
-        var F_L414_3 = new Decimal(0.80)
-        var F_L414_5_IM = new Decimal(1.48)
+        let F_L414_3 = new Decimal(0.80)
+        let F_L414_5_IM = new Decimal(1.48)
         // 计算精度
-        var PRECISION = 3
+        let PRECISION = 3
         // 操规允许的最大值
-        var MAX_L414_3 = 0.3
-        var MAX_L414_5_IM = 1.0
-        var MAX_TOTAL_IMPURITIES = 2.0
-        var MIN_PURITY = 98.0
+        let MAX_L414_3 = 0.3
+        let MAX_L414_5_IM = 1.0
+        let MAX_TOTAL_IMPURITIES = 2.0
+        let MIN_PURITY = 98.0
 
 
         // 默认的消息提示
-        var tips = `计算 L414-3、L414-5-IM、杂质总量、纯度`
+        let tips = `计算 L414-3、L414-5-IM、杂质总量、纯度`
 
-        var decimal = Decimal.set({
+        let decimal = Decimal.set({
             rounding: Decimal.ROUND_HALF_EVEN,
             precision: 12
-        });
+        })
 
         $(document).ready(() => {
             let one_all = $("#one-all")
@@ -55,9 +55,9 @@
                 two_all.val(24409434)
             }
 
-            setCheckInputEvent()
             $("#msgbox").html(tips)
             $("#new_page").click(() => window.open(window.location.href, "_BLANK"))
+
             $("#clear").click(() => {
                 one_all.val("")
                 two_all.val("")
@@ -71,6 +71,7 @@
                 $("#msgbox").html(tips)
                 $("#table").hide()
             })
+
             $("#ok").click(() => {
                 let one_414_3_cf = correctionFactor(one_414_3.val(), one_all.val(), F_L414_3)
                 let one_414_5_im_cf = correctionFactor(one_414_5_im.val(), one_all.val(), F_L414_5_IM)
@@ -146,20 +147,6 @@
             $("#L414-5-IM>#average").html(data.average.L414_5_IM)
             $("#impurities>#average").html(data.average.impurities)
             $("#purity>#average").html(data.average.purity)
-        }
-
-        function setCheckInputEvent() {
-            let checkInput = (event) => {
-                event.target.value = event.target.value.replace(/[\D]/g, '')
-            }
-            $("#one-all").on("input", checkInput)
-            $("#one-414-3").on("input", checkInput)
-            $("#one-414-5-im").on("input", checkInput)
-            $("#one-414-5").on("input", checkInput)
-            $("#two-all").on("input", checkInput)
-            $("#two-414-3").on("input", checkInput)
-            $("#two-414-5-im").on("input", checkInput)
-            $("#two-414-5").on("input", checkInput)
         }
 
         /**

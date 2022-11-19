@@ -5,18 +5,20 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>L014-1 相关物质计算</title>
+    <title>L014-1 相关物质</title>
     <link rel="stylesheet" href="./github.css">
     <link rel="stylesheet" href="./theme.css">
     <script src="./decimal.js"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
-        var decimal = Decimal.set({
+        let decimal = Decimal.set({
             rounding: Decimal.ROUND_HALF_EVEN,
             precision: 12
         })
         $(document).ready(() => {
+            const DEBUG = false
+
             // 2.2-Dimer 最大值
             const DIMER_MAX = 2.5
             // 2-乙酰噻吩 最大值
@@ -32,30 +34,40 @@
             const AT_RRF = 2.06
 
             // 计算精度
-            var PRECISION = new Decimal(12).toNumber()
+            let PRECISION = new Decimal(3).toNumber()
 
-            var clear_list = [
-                $("#one-dimer"),
-                $("#one-at"),
-                $("#one-014-1"),
-                $("#one-all"),
-                $("#two-dimer"),
-                $("#two-at"),
-                $("#two-014-1"),
-                $("#two-all"),
-                $("#msgbox")
-            ]
+            if (DEBUG) {
+                $("#one-dimer").val(247427)
+                $("#one-at").val(65863)
+                $("#one-014-1").val(11511879)
+                $("#one-all").val(11888859)
+
+                $("#two-dimer").val(249299)
+                $("#two-at").val(66682)
+                $("#two-014-1").val(11563139)
+                $("#two-all").val(11943432)
+            }
 
             $("#precision").on('input', event => {
                 let p = $("#precision").val()
                 $("#precision-text").text(p)
                 PRECISION = new Decimal(p).toNumber()
             })
+
             $("#new_page").click(() => window.open(window.location.href, '_BLANK'))
-            $("#clear").click(() => clear_list.forEach(v => {
-                v.val("")
-                v.empty()
-            }))
+
+            $("#clear").click(() => {
+                $("#one-dimer").val("")
+                $("#one-at").val("")
+                $("#one-014-1").val("")
+                $("#one-all").val("")
+                $("#two-dimer").val("")
+                $("#two-at").val("")
+                $("#two-014-1").val("")
+                $("#two-all").val("")
+                $("#msgbox").empty()
+            })
+
             $("#ok").click(() => {
                 let one_dimer = $("#one-dimer").val()
                 let one_at = $("#one-at").val()
@@ -124,13 +136,14 @@
                 return decimal.mul(y, 100).toFixed(PRECISION, Decimal.ROUND_HALF_EVEN)
             }
 
+            // TODO: 解决总杂计算不准的问题
             let func_impurities = (dimer, at, l014_1, all) => {
                 if (dimer == '' || at == '' || l014_1 == '' || all == '') return 0
                 // x = all - dimer - at - l014_1
                 // y = (x / all) * 100
                 // impurities% = y + dimer% + at%
                 let x = decimal.sub(all, dimer).sub(at).sub(l014_1)
-                let y = decimal.div(x, all).mul(100)
+                let y = decimal.div(x, all).mul(100).toFixed(PRECISION)
                 let z = decimal.add(y, func_dimer(dimer, all)).add(func_at(at, all))
                 return z.toFixed(PRECISION, Decimal.ROUND_HALF_EVEN)
             }
@@ -156,12 +169,12 @@
 </head>
 
 <body>
-    <h3>L014-1 相关物质计算</h3>
+    <h3>L014-1 相关物质</h3>
     <strong>* 此功能未经详细测试，计算结果仅供参考。</strong>
 
     <br><br>
-    <label for="precision">计算精度：</label><span id="precision-text">12</span>
-    <input type="range" id="precision" value="12" min="0" max="12">
+    <label for="precision">计算精度：</label><span id="precision-text">3</span>
+    <input type="range" id="precision" value="3" min="0" max="12">
     <div class="one">
         第一组<br>
         <input type="number" name="one-dimer" id="one-dimer" inputmode="numeric" placeholder="2.2-Dimer 峰面积">
