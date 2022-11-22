@@ -131,7 +131,7 @@ ${m0r != '' && m1r != '' ? `第二组恒重后空瓶+样 = ${decimal.add(m0r, m1
                     confirm("请输入或选择样品批号！")
                     return
                 }
-                if (confirm("确认删除 " + id + " 的数据？")) {
+                if (confirm(`确认删除 ${id} 的数据？`)) {
                     io.remove(id)
                     loadSavedContentsList()
                     $("#clear").click()
@@ -235,6 +235,7 @@ ${m0r != '' && m1r != '' ? `第二组恒重后空瓶+样 = ${decimal.add(m0r, m1
 
         function loadSavedContentsList() {
             // load data from localStorage to input.
+            $("#keys").empty()
             let keys = io.listKeys().sort()
             keys.forEach(key => {
                 let timestamp = JSON.parse(io.read(key)).time
