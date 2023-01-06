@@ -8,27 +8,24 @@
     <title>干燥失重</title>
     <link rel="stylesheet" href="./github.css">
     <link rel="stylesheet" href="./theme.css">
-    <script src="./decimal.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script type="module">
+        import { Decimal } from './modules/decimal.mjs'
         import { IO } from './modules/tools.js'
         let io = new IO('lod')
         let debug = false
         let tip = `
-<br>
-操作过程：
-<br>
-空瓶 -> 干燥3小时 -> 冷却称重 -> 干燥1小时 -> 冷却称重(1) -> 加样(2) -> 干燥3小时 -> 冷却称重 -> 干燥1小时 -> 冷却称重(3)
-<br>
-<br>
-记录保存功能使用方法：
-<br>
-保存：输入样品批号，点击保存，此时第一组及第二组输入框内的数据将被存储。
-<br>
-恢复：输入或选择样品批号，点击恢复，此时将读取对应数据并自动填入输入框。
-<br>
-删除：输入或选择样品批号，点击删除，此时将从已存储的数据中删除对应数据。
-`
+            <br><b>操作过程：</b>
+            <br>&nbsp;&nbsp; 1. 空瓶干燥 3 小时
+            <br>&nbsp;&nbsp; 2. 冷却称重
+            <br>&nbsp;&nbsp; 3. 干燥 1 小时
+            <br>&nbsp;&nbsp; 4. 冷却称重(1) 并加样(2)
+            <br>&nbsp;&nbsp; 5. 干燥 3 小时
+            <br>&nbsp;&nbsp; 6. 冷却称重
+            <br>&nbsp;&nbsp; 7. 干燥 1 小时
+            <br>&nbsp;&nbsp; 8. 冷却称重(3)
+            <br>
+        `
 
         let decimal = Decimal.set({
             rounding: Decimal.ROUND_HALF_EVEN,
@@ -46,27 +43,23 @@
             }
 
             $("#ok").click(() => {
-                var m0l = $("#m0l").val()
-                var m1l = $("#m1l").val()
-                var m3l = $("#m3l").val()
-                var m0r = $("#m0r").val()
-                var m1r = $("#m1r").val()
-                var m3r = $("#m3r").val()
+                let m0l = $("#m0l").val()
+                let m1l = $("#m1l").val()
+                let m3l = $("#m3l").val()
+                let m0r = $("#m0r").val()
+                let m1r = $("#m1r").val()
+                let m3r = $("#m3r").val()
 
-
-                var lod1 = lod(m0l, m1l, m3l)
-                var lod2 = lod(m0r, m1r, m3r)
-                var average = decimal.add(lod1, lod2).div(2).toString()
-
-                // TODO 可能干燥失重不应该使用 RSD 值来判断是否平行，可尝试使用 RD 或 RAD 判断
-                // let rsd = RSD(lod1, lod2)
+                let lod1 = lod(m0l, m1l, m3l)
+                let lod2 = lod(m0r, m1r, m3r)
+                let average = decimal.add(lod1, lod2).div(2).toString()
 
                 let format = (value) => {
                     if (value <= 0) return `<span style="color: red;">${value}</span>`
                     return value
                 }
 
-                var msg = `
+                let msg = `<br>
 第一组干燥失重 = ${format(lod1)}<br>
 第二组干燥失重 = ${format(lod2)}<br>
 两组干燥失重平均值 = ${format(average)}<br>
@@ -80,18 +73,12 @@ ${m0r != '' && m1r != '' ? `第二组恒重后空瓶+样 = ${decimal.add(m0r, m1
             $("#clear").click(() => {
                 if (!window.confirm("所填写的数据将被清空，确定？")) return
                 $("#lod-name").val("")
-                $("#m0l").val("")
-                $("#m1l").val("")
-                $("#m3l").val("")
-                $("#m0r").val("")
-                $("#m1r").val("")
-                $("#m3r").val("")
-                message(tip)
+                clearInput()
             })
 
             $("#new_page").click(() => {
                 // 将当前页面的数据封装，并通过 URL 参数传递给新页面
-                let data = JSON.stringify(exportData())
+                let data = JSON.stringify(io.collectData($("input")))
                 let search = `?data=${data}`.replaceAll('"', '%22')
                 let url = `${window.location.origin}${window.location.pathname}${search}`
                 window.open(url, "_blank")
@@ -104,8 +91,7 @@ ${m0r != '' && m1r != '' ? `第二组恒重后空瓶+样 = ${decimal.add(m0r, m1
                     return
                 }
 
-                let lod = exportData()
-                io.write(id, JSON.stringify(lod))
+                io.write(id, JSON.stringify(io.collectData($("input"))))
                 loadSavedContentsList()
             })
 
@@ -117,12 +103,7 @@ ${m0r != '' && m1r != '' ? `第二组恒重后空瓶+样 = ${decimal.add(m0r, m1
                 }
 
                 let lod = JSON.parse(io.read(id))
-                $("#m0l").val(lod.m0l)
-                $("#m1l").val(lod.m1l)
-                $("#m3l").val(lod.m3l)
-                $("#m0r").val(lod.m0r)
-                $("#m1r").val(lod.m1r)
-                $("#m3r").val(lod.m3r)
+                io.exportData(lod, $("input"))
             })
 
             $("#remove").click(() => {
@@ -134,7 +115,8 @@ ${m0r != '' && m1r != '' ? `第二组恒重后空瓶+样 = ${decimal.add(m0r, m1
                 if (confirm(`确认删除 ${id} 的数据？`)) {
                     io.remove(id)
                     loadSavedContentsList()
-                    $("#clear").click()
+                    $("#lod-name").val("")
+                    clearInput()
                 }
             })
 
@@ -148,44 +130,31 @@ ${m0r != '' && m1r != '' ? `第二组恒重后空瓶+样 = ${decimal.add(m0r, m1
             }
         })
 
-        // 需要传递给新页面的数据
-        function exportData() {
-            let data = {
-                "time": Date.now(),
-                "id": $("#lod-name").val(),
-                "m0l": $("#m0l").val(),
-                "m1l": $("#m1l").val(),
-                "m3l": $("#m3l").val(),
-                "m0r": $("#m0r").val(),
-                "m1r": $("#m1r").val(),
-                "m3r": $("#m3r").val(),
-            }
-            return data
+        function clearInput() {
+            $("#m0l").val("")
+            $("#m1l").val("")
+            $("#m3l").val("")
+            $("#m0r").val("")
+            $("#m1r").val("")
+            $("#m3r").val("")
+            message(tip)
         }
 
         // 需要导入哪些
         function importData(data) {
+            io.exportData(data, $("input"))
+            clearInput()
             // 对批号自增
-            let id = data.id
-            if (data.id.indexOf('-')) {
-                let x = data.id.split('-')
+            let id = data.lod_name
+            if (data.lod_name.indexOf('-')) {
+                let x = data.lod_name.split('-')
                 id = x[x.length - 1]
             }
-            console.log(id)
             id = decimal.add(id, 1)
-            if (data.id.indexOf('-')) {
-                id = data.id.substring(0, data.id.lastIndexOf('-') + 1) + id
+            if (data.lod_name.indexOf('-')) {
+                id = data.lod_name.substring(0, data.lod_name.lastIndexOf('-') + 1) + id
             }
-            console.log(id)
-
             $("#lod-name").val(id)
-            // 暂时不需要自动填充上一个页面传来的数据
-            // $("#m0l").val(data.m0l)
-            // $("#m1l").val(data.m1l)
-            // $("#m3l").val(data.m3l)
-            // $("#m0r").val(data.m0r)
-            // $("#m1r").val(data.m1r)
-            // $("#m3r").val(data.m3r)
         }
 
         function getUrlParams(key) {
@@ -196,49 +165,12 @@ ${m0r != '' && m1r != '' ? `第二组恒重后空瓶+样 = ${decimal.add(m0r, m1
             }
         }
 
-        // 计算相对标准偏差
-        // Markdown 公式：$RSD = \frac{SD}{\overline{x}}*100\%$
-        function RSD(...array) {
-            let stdev = STDEV(...array)
-            let average = () => {
-                let sum = new Decimal(0)
-                array.forEach(value => sum = sum.plus(new Decimal(value)))
-                return sum.dividedBy(array.length)
-            }
-
-            let rsd = stdev.dividedBy(average()).times(100)
-            return rsd.toPrecision(5)
-        }
-
-        // 计算标准偏差
-        // Markdown 公式：$SD = \sqrt{\frac{\sum_{i=1}^{n}(x_i - \overline{x})^2}{n-1}}$
-        function STDEV(...array) {
-            // 计算所有数值的和
-            var sum = new Decimal(0)
-            array.forEach(value => sum = sum.plus(new Decimal(value)))
-
-            // 计算所有数值的平均值
-            let average = sum.dividedBy(array.length)
-
-            // 计算 ((每个数值减去平均值)的二次方)的和，即公式中分子的结果
-            var sumEach = new Decimal(0)
-            array.forEach(value => {
-                let v = new Decimal(value)
-                let temp = v.minus(average).toPower(2)
-                sumEach = sumEach.plus(temp)
-            })
-
-            // 以上结果除以 n-1 并开根号即得
-            let x = sumEach.dividedBy(array.length - 1).squareRoot()
-            return x
-        }
-
         function loadSavedContentsList() {
             // load data from localStorage to input.
             $("#keys").empty()
             let keys = io.listKeys().sort()
             keys.forEach(key => {
-                let timestamp = JSON.parse(io.read(key)).time
+                let timestamp = JSON.parse(io.read(key)).timestamp
                 let time = new Date(timestamp).format("yyyy-MM-dd hh:mm")
                 let option = document.createElement("option")
                 $(option).attr("value", key)
@@ -307,13 +239,13 @@ ${m0r != '' && m1r != '' ? `第二组恒重后空瓶+样 = ${decimal.add(m0r, m1
         // 为 Date 创建日期格式化方法
         Date.prototype.format = function (fmt) {
             let o = {
-                "M+": this.getMonth() + 1,                 //月份
-                "d+": this.getDate(),                    //日
-                "h+": this.getHours(),                   //小时
-                "m+": this.getMinutes(),                 //分
-                "s+": this.getSeconds(),                 //秒
-                "q+": Math.floor((this.getMonth() + 3) / 3), //季度
-                "S": this.getMilliseconds()             //毫秒
+                "M+": this.getMonth() + 1,                  // 月份
+                "d+": this.getDate(),                       // 日
+                "h+": this.getHours(),                      // 小时
+                "m+": this.getMinutes(),                    // 分
+                "s+": this.getSeconds(),                    // 秒
+                "q+": Math.floor((this.getMonth() + 3) / 3),// 季度
+                "S": this.getMilliseconds()                 // 毫秒
             }
             if (/(y+)/.test(fmt)) {
                 fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length))

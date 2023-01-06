@@ -8,34 +8,50 @@
     <title>L014-1 相关物质</title>
     <link rel="stylesheet" href="./github.css">
     <link rel="stylesheet" href="./theme.css">
-    <script src="./decimal.js"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script>
+    <script type="module">
+        import { Decimal } from "./modules/decimal.mjs"
+
         let decimal = Decimal.set({
             rounding: Decimal.ROUND_HALF_EVEN,
             precision: 12
         })
+
+        // 舍入模式：四舍六入五成双
+        const ROUNDING = Decimal.ROUND_HALF_EVEN
+        // 计算精度
+        const PRECISION = 3
+
+        // debug 开关
+        const DEBUG = false
+
+        // 2.2-Dimer 最大值
+        const DIMER_MAX = 2.5
+        // 2-乙酰噻吩 最大值
+        const AT_MAX = 1.0
+        // 总杂 最大值
+        const TOTAL_IMPURITIES_MAX = 4
+        // 纯度 最小值
+        const PURTY_MIN = 96
+
+        // 2.2-Dimer 的 RRF
+        const DIMER_RRF = 1.34
+        // 2-乙酰噻吩 的 RRF
+        const AT_RRF = 2.06
+
+        const msg = `
+            <b>相关参数：</b><br>
+            &nbsp;&nbsp; 2.2-Dimer 的 RRF: ${DIMER_RRF}<br>
+            &nbsp;&nbsp; 2-乙酰噻吩的 RRF: ${AT_RRF}<br>
+            <br>
+            <b>质量标准：</b><br>
+            &nbsp;&nbsp; 2.2-Dimer &le; ${DIMER_MAX}% <br>
+            &nbsp;&nbsp; 2-乙酰噻吩 &le; ${AT_MAX.toFixed(1)}% <br>
+            &nbsp;&nbsp; 杂质总量 &le; ${TOTAL_IMPURITIES_MAX}% <br>
+            &nbsp;&nbsp; 纯度 &ge; ${PURTY_MIN}% <br>
+        `
+
         $(document).ready(() => {
-            const DEBUG = false
-
-            // 2.2-Dimer 最大值
-            const DIMER_MAX = 2.5
-            // 2-乙酰噻吩 最大值
-            const AT_MAX = 1.0
-            // 总杂 最大值
-            const TOTAL_IMPURITIES_MAX = 4
-            // 纯度 最小值
-            const PURTY_MIN = 96
-
-            // 2.2-Dimer 的 RRF
-            const DIMER_RRF = 1.34
-            // 2-乙酰噻吩 的 RRF
-            const AT_RRF = 2.06
-
-            // 计算精度
-            let PRECISION = new Decimal(3).toNumber()
-
             if (DEBUG) {
                 $("#one-dimer").val(247427)
                 $("#one-at").val(65863)
@@ -48,11 +64,7 @@
                 $("#two-all").val(11943432)
             }
 
-            $("#precision").on('input', event => {
-                let p = $("#precision").val()
-                $("#precision-text").text(p)
-                PRECISION = new Decimal(p).toNumber()
-            })
+            $("#msgbox").html(msg)
 
             $("#new_page").click(() => window.open(window.location.href, '_BLANK'))
 
@@ -65,116 +77,140 @@
                 $("#two-at").val("")
                 $("#two-014-1").val("")
                 $("#two-all").val("")
-                $("#msgbox").empty()
+                $("#msgbox").html(msg)
+                $("#table").hide()
             })
 
             $("#ok").click(() => {
                 let one_dimer = $("#one-dimer").val()
-                let one_at = $("#one-at").val()
-                let one_014_1 = $("#one-014-1").val()
-                let one_all = $("#one-all").val()
                 let two_dimer = $("#two-dimer").val()
-                let two_at = $("#two-at").val()
+                let one_014_1 = $("#one-014-1").val()
                 let two_014_1 = $("#two-014-1").val()
+                let one_at = $("#one-at").val()
+                let two_at = $("#two-at").val()
+                let one_all = $("#one-all").val()
                 let two_all = $("#two-all").val()
 
-                let one_dimer_ = func_dimer(one_dimer, one_all)
-                let one_at_ = func_at(one_at, one_all)
-                let one_impurities = func_impurities(one_dimer, one_at, one_014_1, one_all)
-                let one_purity = func_purity(one_impurities)
+                let one_dimer_ = func_dimer(one_dimer, one_all).toFixed(PRECISION, ROUNDING)
+                let one_at_ = func_at(one_at, one_all).toFixed(PRECISION, ROUNDING)
+                let one_impurities = func_impurities(one_dimer, one_at, one_014_1, one_all).toFixed(PRECISION, ROUNDING)
+                let one_purity = func_purity(one_impurities).toFixed(PRECISION, ROUNDING)
 
-                let two_dimer_ = func_dimer(two_dimer, two_all)
-                let two_at_ = func_at(two_at, two_all)
-                let two_impurities = func_impurities(two_dimer, two_at, two_014_1, two_all)
-                let two_purity = func_purity(two_impurities)
+                let two_dimer_ = func_dimer(two_dimer, two_all).toFixed(PRECISION, ROUNDING)
+                let two_at_ = func_at(two_at, two_all).toFixed(PRECISION, ROUNDING)
+                let two_impurities = func_impurities(two_dimer, two_at, two_014_1, two_all).toFixed(PRECISION, ROUNDING)
+                let two_purity = func_purity(two_impurities).toFixed(PRECISION, ROUNDING)
 
-                let msg = `
-                第一组结果：<br>
-                2.2-Dimer: ${format(one_dimer_, DIMER_MAX)} <br>
-                2-乙酰噻吩: ${format(one_at_, AT_MAX)} <br>
-                总杂: ${format(one_impurities, TOTAL_IMPURITIES_MAX)} <br>
-                纯度: ${format(one_purity, PURTY_MIN, true)} <br>
+                let average_dimer = averageFixed(average(one_dimer_, two_dimer_))
+                let average_at = averageFixed(average(one_at_, two_at_))
+                let average_impurities = averageFixed(average(one_impurities, two_impurities))
+                let average_purity = averageFixed(average(one_purity, two_purity))
 
-                <br>
-                第二组结果：<br>
-                2.2-Dimer: ${format(two_dimer_, DIMER_MAX)} <br>
-                2-乙酰噻吩: ${format(two_at_, AT_MAX)} <br>
-                总杂: ${format(two_impurities, TOTAL_IMPURITIES_MAX)} <br>
-                纯度: ${format(two_purity, PURTY_MIN, true)} <br>
+                let data = {
+                    "one": {
+                        "dimer": format(one_dimer_, DIMER_MAX),
+                        "at": format(one_at_, AT_MAX),
+                        "impurities": format(one_impurities, TOTAL_IMPURITIES_MAX),
+                        "purity": format(one_purity, 100, PURTY_MIN,)
+                    },
+                    "two": {
+                        "dimer": format(two_dimer_, DIMER_MAX),
+                        "at": format(two_at_, AT_MAX),
+                        "impurities": format(two_impurities, TOTAL_IMPURITIES_MAX),
+                        "purity": format(two_purity, 100, PURTY_MIN)
+                    },
+                    "average": {
+                        "dimer": format(average_dimer, DIMER_MAX),
+                        "at": format(average_at, AT_MAX),
+                        "impurities": format(average_impurities, TOTAL_IMPURITIES_MAX),
+                        "purity": format(average_purity, 100, PURTY_MIN)
+                    }
+                }
 
-                <br>
-                平均值：<br>
-                2.2-Dimer: ${format(func_average(one_dimer_, two_dimer_), DIMER_MAX)} <br>
-                2-乙酰噻吩: ${format(func_average(one_at_, two_at_), AT_MAX)} <br>
-                总杂: ${format(func_average(one_impurities, two_impurities), TOTAL_IMPURITIES_MAX)} <br>
-                纯度: ${format(func_average(one_purity, two_purity), PURTY_MIN, true)} <br>
-
-                <br>
-                操规允许：<br>
-                2.2-Dimer &le; ${DIMER_MAX}% <br>
-                2-乙酰噻吩 &le; ${AT_MAX.toFixed(1)}% <br>
-                总杂 &le; ${TOTAL_IMPURITIES_MAX}% <br>
-                纯度 &ge; ${PURTY_MIN}% <br>
-                `
-
-                $("#msgbox").html(msg)
+                generateTable(data)
             })
 
-            let func_dimer = (dimer, all) => {
-                if (dimer == '' || all == '') return 0
-                // dimer% = [dimer / (all * RRF)] * 100
-                let x = decimal.mul(all, DIMER_RRF)
-                let y = decimal.div(dimer, x)
-                return decimal.mul(y, 100).toFixed(PRECISION, Decimal.ROUND_HALF_EVEN)
-            }
-
-            let func_at = (at, all) => {
-                if (at == '' || all == '') return 0
-                // at% = [at / (all * RRF)] * 100
-                let x = decimal.mul(all, AT_RRF)
-                let y = decimal.div(at, x)
-                return decimal.mul(y, 100).toFixed(PRECISION, Decimal.ROUND_HALF_EVEN)
-            }
-
-            // TODO: 解决总杂计算不准的问题
-            let func_impurities = (dimer, at, l014_1, all) => {
-                if (dimer == '' || at == '' || l014_1 == '' || all == '') return 0
-                // x = all - dimer - at - l014_1
-                // y = (x / all) * 100
-                // impurities% = y + dimer% + at%
-                let x = decimal.sub(all, dimer).sub(at).sub(l014_1)
-                let y = decimal.div(x, all).mul(100).toFixed(PRECISION)
-                let z = decimal.add(y, func_dimer(dimer, all)).add(func_at(at, all))
-                return z.toFixed(PRECISION, Decimal.ROUND_HALF_EVEN)
-            }
-
-            // purty% = 100 - impurities%
-            let func_purity = (total_impurities) => {
-                if (total_impurities == '') return 0
-                return decimal.sub(100, total_impurities).toFixed(PRECISION, Decimal.ROUND_HALF_EVEN)
-            }
-
-            let func_average = (a, b) => decimal.add(a, b).div(2).toFixed(PRECISION, Decimal.ROUND_HALF_EVEN)
-
-            let format = (value, max, more = false) => {
-                let red = `<span style='color: red;'>${value}%</span>`
-                if (value == 0) return 'ND'
-                if (value < 0) return red
-                if (!more && value >= max) return red
-                if (more && value <= max) return red
-                return `${value}%`
-            }
         })
+
+        function func_dimer(dimer, all) {
+            if (dimer == '' || all == '') return 0
+            // dimer% = [dimer / (all * RRF)] * 100
+            let x = decimal.mul(all, DIMER_RRF)
+            let y = decimal.div(dimer, x)
+            return decimal.mul(y, 100)
+        }
+
+        function func_at(at, all) {
+            if (at == '' || all == '') return 0
+            // at% = [at / (all * RRF)] * 100
+            let x = decimal.mul(all, AT_RRF)
+            let y = decimal.div(at, x)
+            return decimal.mul(y, 100)
+        }
+
+        function func_impurities(dimer, at, l014_1, all) {
+            if (dimer == '' || at == '' || l014_1 == '' || all == '') return 0
+            // x = all - dimer - at - l014_1
+            // y = (x / all) * 100
+            // impurities% = y + dimer% + at%
+            let x = decimal.sub(all, dimer).sub(at).sub(l014_1)
+            let y = decimal.div(x, all).mul(100)
+            let z = decimal.add(y, func_dimer(dimer, all)).add(func_at(at, all))
+            return z
+        }
+
+        function func_purity(total_impurities) {
+            if (total_impurities == '') return 0
+            // purty% = 100 - impurities%
+            return decimal.sub(100, total_impurities)
+        }
+
+        function average(a, b) {
+            return decimal.add(a, b).div(2)
+        }
+
+        function format(value, max, min = 0) {
+            if (value == 0) {
+                return 'ND' // means 'Not Detected'
+            }
+
+            if (value > max || value < min) {
+                return `<span style='color: red;'>${value}</span>`
+            }
+
+            return value
+        }
+
+        // 对平均值进行舍入
+        function averageFixed(value) {
+            // 大于等于 1 时只保留一位小数，否则保留两位
+            return value.toFixed(value >= 1 ? 1 : 2, ROUNDING)
+        }
+
+        function generateTable(data) {
+            $("#table").show()
+
+            $("#Dimer>#one").html(data.one.dimer)
+            $("#2-AT>#one").html(data.one.at)
+            $("#impurities>#one").html(data.one.impurities)
+            $("#purity>#one").html(data.one.purity)
+
+            $("#Dimer>#two").html(data.two.dimer)
+            $("#2-AT>#two").html(data.two.at)
+            $("#impurities>#two").html(data.two.impurities)
+            $("#purity>#two").html(data.two.purity)
+
+            $("#Dimer>#average").html(data.average.dimer)
+            $("#2-AT>#average").html(data.average.at)
+            $("#impurities>#average").html(data.average.impurities)
+            $("#purity>#average").html(data.average.purity)
+        }
+
     </script>
 </head>
 
 <body>
     <h3>L014-1 相关物质</h3>
-    <strong>* 此功能未经详细测试，计算结果仅供参考。</strong>
-
-    <br><br>
-    <label for="precision">计算精度：</label><span id="precision-text">3</span>
-    <input type="range" id="precision" value="3" min="0" max="12">
     <div class="one">
         第一组<br>
         <input type="number" name="one-dimer" id="one-dimer" inputmode="numeric" placeholder="2.2-Dimer 峰面积">
@@ -200,6 +236,45 @@
     </div>
 
     <br>
+    <table id="table" style="font-size: small; width: 100%; text-align: center; display: none;">
+        <caption>计算结果</caption>
+        <tr>
+            <th scope="col">/</th>
+            <th scope="col">第一组(%)</th>
+            <th scope="col">第二组(%)</th>
+            <th scope="col">平均值(%)</th>
+        </tr>
+        <tr id="Dimer">
+            <th scope="row">2.2-Dimer</th>
+            <td id="one"></td>
+            <td id="two"></td>
+            <td id="average"></td>
+        </tr>
+        <tr id="2-AT">
+            <th scope="row">2-乙酰噻吩</th>
+            <td id="one"></td>
+            <td id="two"></td>
+            <td id="average"></td>
+        </tr>
+        <tr id="max_impurities">
+            <th scope="row">最大单杂</th>
+            <td id="one">/</td>
+            <td id="two">/</td>
+            <td id="average">/</td>
+        </tr>
+        <tr id="impurities">
+            <th scope="row">杂质总量</th>
+            <td id="one"></td>
+            <td id="two"></td>
+            <td id="average"></td>
+        </tr>
+        <tr id="purity">
+            <th scope="row">纯度</th>
+            <td id="one"></td>
+            <td id="two"></td>
+            <td id="average"></td>
+        </tr>
+    </table>
     <div id="msgbox"></div>
 </body>
 
