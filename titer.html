@@ -8,9 +8,11 @@
     <title>标水</title>
     <link rel="stylesheet" href="./github.css">
     <link rel="stylesheet" href="./theme.css">
-    <script src="./decimal.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script>
+    <script type="module">
+        import { Decimal } from "./modules/decimal.mjs"
+        import { Formula } from "./modules/tools.js"
+
         let debug = false
         let tip = `<br>
         请输入三次 F 值<br>
@@ -24,20 +26,20 @@
         })
 
         $(document).ready(() => {
-            $(".msgbox").append(tip)
+            message(tip)
 
             $("#ok").click(() => {
                 let m0 = $("#m0").val()
                 let m1 = $("#m1").val()
                 let m2 = $("#m2").val()
-                f = average(m0, m1, m2)
+                let f = Formula.AVERAGE(m0, m1, m2).toFixed(4, Decimal.ROUND_HALF_EVEN)
 
                 let msg = `
                     <br>
                     F值平均值 = ${f}<br>
-                    RD1 = ${titer(f, m0)}<br>
-                    RD2 = ${titer(f, m1)}<br>
-                    RD3 = ${titer(f, m2)}<br>
+                    RD1 = ${format(titer(f, m0))}<br>
+                    RD2 = ${format(titer(f, m1))}<br>
+                    RD3 = ${format(titer(f, m2))}<br>
                 `
                 message(msg)
             })
@@ -54,15 +56,15 @@
             })
 
             if (debug) {
-                $("#m0").val(2)
-                $("#m1").val(3)
-                $("#m2").val(4)
+                $("#m0").val(5.1183)
+                $("#m1").val(5.1823)
+                $("#m2").val(5.0926)
             }
         })
 
         function message(msg) {
             $(".msgbox").empty()
-            $(".msgbox").append(msg)
+            $(".msgbox").html(msg)
         }
 
         /**
@@ -71,17 +73,15 @@
          * @param m 该次mg/mL的值
          */
         function titer(f, m) {
-            temp = decimal.sub(m, f)
-            return temp.div(f).mul(100)
+            let temp = decimal.sub(m, f)
+            return temp.div(f).mul(100).toFixed(2, Decimal.ROUND_HALF_EVEN)
         }
 
-        function average(a, b, c) {
-            let sum = Decimal(a).add(Decimal(b)).add(Decimal(c))
-            return decimal.div(sum, 3)
-        }
-
-        function checkNull(m0, m1, m2) {
-            return m0 == '' || m1 == '' || m2 == ''
+        function format(value, min = -1, max = 1) {
+            if (value <= min || value >= max) {
+                return `<span style='font-family: none; color: red;'>${value}</span>`
+            }
+            return `<span style='font-family: none;'>${value}</span>`
         }
 
     </script>
@@ -93,9 +93,8 @@
         <input type="number" id="m0" class="m0" placeholder="F1" inputmode="decimal"><br>
         <input type="number" id="m1" class="m1" placeholder="F2" inputmode="decimal"><br>
         <input type="number" id="m2" class="m2" placeholder="F3" inputmode="decimal"><br>
-        <br>
     </div>
-
+    <br>
     <div class="buttons">
         <button id="new_page">新开标签页</button>
         <button id="clear">清除内容</button>
