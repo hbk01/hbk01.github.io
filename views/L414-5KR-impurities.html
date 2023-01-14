@@ -6,27 +6,47 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>L414-5KR 相关物质</title>
-    <link rel="stylesheet" href="./github.css">
-    <link rel="stylesheet" href="./theme.css">
-    <script src="./decimal.js"></script>
+    <link rel="stylesheet" href="../statics/github.css">
+    <link rel="stylesheet" href="../statics/theme.css">
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script>
-        let debug = false
+    <script type="module">
+        import { Decimal }  from "../statics/modules/decimal.mjs"
 
+        // debug 开关
+        const DEBUG = false
         // 校正因子
-        let F_L414_3 = new Decimal(0.80)
-        let F_L414_5_IM = new Decimal(1.48)
+        const F_L414_3 = 0.80
+        const F_L414_5_IM = 1.48
         // 计算精度
-        let PRECISION = 3
+        const PRECISION = 3
         // 操规允许的最大值
-        let MAX_L414_3 = 0.3
-        let MAX_L414_5_IM = 1.0
-        let MAX_TOTAL_IMPURITIES = 2.0
-        let MIN_PURITY = 98.0
+        const MAX_L414_3 = 0.3
+        const MAX_L414_5_IM = 1.0
+        const MAX_TOTAL_IMPURITIES = 2.0
+        const MIN_PURITY = 98.0
 
+        let tips_params = `
+            <b>相关参数：</b><br>
+            &nbsp;&nbsp; L414-3 的校正因子: ${F_L414_3.toFixed(2)}<br>
+            &nbsp;&nbsp; L414-5-IM 的校正因子: ${F_L414_5_IM}<br>
+        `
+
+        let tips_standard = `
+            <b>质量标准：</b><br>
+            &nbsp;&nbsp; L414-3 &le; ${MAX_L414_3}% <br>
+            &nbsp;&nbsp; L414-401 &le; 0.2% <br>
+            &nbsp;&nbsp; L414-5-IM &le; ${MAX_L414_5_IM.toFixed(1)}% <br>
+            &nbsp;&nbsp; 最大单杂 &le; 0.50% <br>
+            &nbsp;&nbsp; 杂质总量 &le; ${MAX_TOTAL_IMPURITIES}% <br>
+            &nbsp;&nbsp; 纯度 &ge; ${MIN_PURITY}% <br>
+        `
 
         // 默认的消息提示
-        let tips = `计算 L414-3、L414-5-IM、杂质总量、纯度`
+        let tips = `
+            ${tips_params}
+            <br>
+            ${tips_standard}
+        `
 
         let decimal = Decimal.set({
             rounding: Decimal.ROUND_HALF_EVEN,
@@ -43,7 +63,7 @@
             let two_414_5_im = $("#two-414-5-im")
             let two_414_5 = $("#two-414-5")
 
-            if (debug) {
+            if (DEBUG) {
                 one_414_3.val(1762)
                 one_414_5_im.val(2614)
                 one_414_5.val(24001626)
@@ -117,15 +137,13 @@
 
                 $("#table").show()
                 generateTable(data)
-
-                let msg = `
-                操规允许: <br>
-                L414-3 &le; ${MAX_L414_3}% <br>
-                L414-5-IM &le; ${MAX_L414_5_IM.toPrecision(2)}% <br>
-                总杂 &le; ${MAX_TOTAL_IMPURITIES.toPrecision(2)}% <br>
-                纯度 &ge; ${MIN_PURITY}% <br>
-                `
-                $("#msgbox").html(msg)
+                $("#msgbox").html(`
+                    <br>
+                    <b>注意：</b><br>
+                    &nbsp;&nbsp; 结果表格中，标注 / 的仅用于占行，具体结果需查看色谱图峰表。<br>
+                    <br>
+                    ${tips}
+                `)
             })
         })
 
@@ -232,7 +250,7 @@
             <td id="average"></td>
         </tr>
         <tr id="L414-4">
-            <th scope="row">L414-4</th>
+            <th scope="row">L414-401</th>
             <td id="one">/</td>
             <td id="two">/</td>
             <td id="average">/</td>
