@@ -8,6 +8,18 @@
     <title>炽灼残渣</title>
     <link rel="stylesheet" href="../statics/github.css">
     <link rel="stylesheet" href="../statics/theme.css">
+    <style>
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 2%
+        }
+
+        input {
+            width: auto;
+        }
+
+    </style>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script type="module">
         import { Decimal } from "../statics/modules/decimal.mjs"
@@ -21,12 +33,19 @@
         let debug = false
 
         let tip = `
-<br>
-操作过程：
-空坩埚 -> 灼烧3小时 -> 冷却称重 -> 灼烧0.5小时 -> 冷却称重(1)
--> 加样(2) -> 烧至无烟 -> 灼烧1小时 -> 冷却称重 -> 灼烧0.5小时 -> 冷却称重(3)
-<br>
-`
+            <br><b>操作过程：</b>
+            <br>&nbsp;&nbsp; 1. 空坩埚灼烧 3 小时
+            <br>&nbsp;&nbsp; 2. 冷却称重
+            <br>&nbsp;&nbsp; 3. 灼烧 0.5 小时
+            <br>&nbsp;&nbsp; 4. 冷却称重(1) 并加样(2)
+            <br>&nbsp;&nbsp; 5. 电热炉烧至无烟
+            <br>&nbsp;&nbsp; 6. 加硫酸再次烧至无烟
+            <br>&nbsp;&nbsp; 7. 灼烧 1 小时
+            <br>&nbsp;&nbsp; 8. 冷却称重
+            <br>&nbsp;&nbsp; 9. 灼烧 0.5 小时
+            <br>&nbsp;&nbsp;10. 冷却称重(3)
+            <br>
+        `
 
         $(document).ready(() => {
             $(".msgbox").append(tip)
@@ -211,25 +230,24 @@
 
 <body>
     <h3>炽灼残渣</h3>
-    <input type="text" name="roi-name" id="roi-name" list="keys" placeholder="样品批号"><br><br>
 
-    <div class="one-team">
-        第一组<br>
-        <input type="number" name="m0l" id="m0l" class="one-input m0" placeholder="恒重后空坩埚重(1)" inputmode="decimal"><br>
-        <input type="number" name="m1l" id="m1l" class="one-input m1" placeholder="样品重(2)" inputmode="decimal"><br>
-        <input type="number" name="m3l" id="m3l" class="one-input m3" placeholder="灼烧恒重后带样品重(3)"
-            inputmode="decimal"><br>
-        <br>
-    </div>
+    <input type="text" name="roi-name" id="roi-name" list="keys" placeholder="样品批号" style="width: 97%;">
+    <br><br>
 
-    <div class="two-team">
-        第二组<br>
-        <input type="number" name="m0r" id="m0r" class="two-input m0" placeholder="恒重后空坩埚重(1)" inputmode="decimal"><br>
-        <input type="number" name="m1r" id="m1r" class="two-input m1" placeholder="样品重(2)" inputmode="decimal"><br>
-        <input type="number" name="m3r" id="m3r" class="two-input m3" placeholder="灼烧恒重后带样品重(3)"
-            inputmode="decimal"><br>
-        <br>
+    <div class="container">
+        <span>第一组</span>
+        <span>第二组</span>
+
+        <input type="number" name="m0l" id="m0l" class="one-input m0" inputmode="decimal" placeholder="恒重后空坩埚重(1)">
+        <input type="number" name="m0r" id="m0r" class="two-input m0" inputmode="decimal" placeholder="恒重后空坩埚重(1)">
+
+        <input type="number" name="m1l" id="m1l" class="one-input m1" inputmode="decimal" placeholder="样品重(2)">
+        <input type="number" name="m1r" id="m1r" class="two-input m1" inputmode="decimal" placeholder="样品重(2)">
+
+        <input type="number" name="m3l" id="m3l" class="one-input m3" inputmode="decimal" placeholder="灼烧恒重后带样品重(3)">
+        <input type="number" name="m3r" id="m3r" class="two-input m3" inputmode="decimal" placeholder="灼烧恒重后带样品重(3)">
     </div>
+    <br>
 
     <div class="buttons">
         <button id="new_page">新开标签页</button>
