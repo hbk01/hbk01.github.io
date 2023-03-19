@@ -39,6 +39,7 @@
             "L018-4W",
             "L018-5",
             "L018-6",
+            "L414-801KR",
         ]
 
         $(() => {
@@ -55,9 +56,12 @@
                     return
                 }
 
+                $("#content").empty()
+                $("#content").text("加载中...")
                 $.ajax({
                     url: `../statics/sop/${name}`,
                     success: (data) => {
+                        $("#content").empty()
                         $("#content").html(md.render(data))
                     }
                 })
@@ -74,7 +78,6 @@
             <option value='null' selected>请选择</option>
         </select>
     </div>
-    <br>
     <div id="content"></div>
 </body>
 
