@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>常用操作规程</title>
+    <title>操作规程</title>
     <link rel="stylesheet" href="../statics/github.css">
     <link rel="stylesheet" href="../statics/theme.css">
     <style>
@@ -32,7 +32,7 @@
         const md = window.markdownit({
             breaks: true
         })
-        const tips = `整理了常用的操作规程中的关键内容以供查询，请以纸质操作规程为准！`
+        const tips = `<br>整理了常用的操作规程中的关键内容以供查询，请以纸质操作规程为准！`
         const sop = [
             "L014-1",
             "L018-1",
@@ -58,7 +58,7 @@
                 }
 
                 $("#content").empty()
-                $("#content").text("加载中...")
+                $("#content").html("<br>加载中...")
                 $.ajax({
                     url: `../statics/sop/${name}`,
                     success: (data) => {
@@ -74,9 +74,8 @@
 
 <body>
     <div>
-        <label for="selector">选择要查看的操作规程：</label><br>
         <select name="selector" id="selector">
-            <option value='null' selected>请选择</option>
+            <option value='null' selected>选择要查看的操作规程</option>
         </select>
     </div>
     <div id="content"></div>
