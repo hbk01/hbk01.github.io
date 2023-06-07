@@ -9,17 +9,10 @@
     <script src="./statics/modules/jquery.min.js"></script>
     <script type="module">
         import { IO } from "./statics/modules/tools.js"
-
-        let settings = new IO('settings')
-        let num = settings.read("index.history.num")
-        let page = num == null ? 10 : num
+        let page = 10
         let url = `https://api.github.com/repos/hbk01/hbk01.github.io/commits?per_page=${page}`
 
         let functions = [
-            {
-                "name": "标水",
-                "location": "./views/titer.html"
-            },
             {
                 "name": "干燥失重",
                 "location": "./views/lod.html"
@@ -43,46 +36,12 @@
         ]
 
         $(() => {
-
-            // 检查是否已初始化设置
-            let init = settings.read("settings.initialized")
-            if (init != "true") {
-                // 移除所有项目
-                settings.listKeys().forEach(key => {
-                    settings.remove(key)
-                })
-
-                // 云端获取默认设置并写入
-                $.getJSON("../statics/settings.json", (data) => {
-                    for (const iterator of data) {
-                        settings.write(iterator.id, iterator.default)
-                        settings.write(`${iterator.id}.desc`, iterator.description)
-                    }
-                    // 写入完成后重新加载页面，以应用当前设置
-                    window.location.reload()
-                })
-            }
-
-
-            let hidden = settings.read("index.functions.hidden")
-            hidden = hidden == "" ? [] : hidden.split(',')
-
             // 加载功能列表
             functions.forEach(value => {
-                for (const iterator of hidden) {
-                    if (value.location.endsWith(iterator)) {
-                        return
-                    }
-                }
-                let div = `<div class="item" onclick="window.location.href='${value.location}'">${value.name}</div>`
+                let onclick = `window.location.href='${value.location}'`
+                let div = `<div class="item" onclick="${onclick}">${value.name}</div>`
                 $(".list").append(div)
             })
-
-            let show = settings.read("index.history.enable")
-            if (show == "false") {
-                $("#changelog_title").hide()
-                return
-            }
 
             // 加载最近的 commit 记录
             $.getJSON(url, data => {
@@ -124,7 +83,7 @@
 </head>
 
 <body>
-    <h4 onclick="window.location.href='./views/settings.html'">功能列表</h4>
+    <h4>功能列表</h4>
     <div class="list"></div>
     <h4>关于</h4>
     <div class="about">
