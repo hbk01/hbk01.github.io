@@ -27,16 +27,22 @@
                 </p>`
             $("#output").append(tip)
 
+            // 初始化当前日期和时间
+            $("#nowDate").val(new Date().format("yyyy-MM-dd"))
+            $("#nowTime").val(new Date().format("hh:mm"))
+
             $("#ok").click(() => {
+                let nowDate = $("#nowDate").val()
+                let nowTime = $("#nowTime").val()
                 let allId = new Decimal($("#allId").val()).toNumber()
                 let nowId = new Decimal($("#nowId").val()).toNumber()
                 let time = new Decimal($("#time").val()).toNumber()
-                let nowTime = new Decimal($("#nowTime").val()).toNumber()
+                let nowRunTime = new Decimal($("#nowRunTime").val()).toNumber()
                 let offset = new Decimal($("#offset").val()).toNumber()
                 let data = []
 
                 // 生成数据
-                let array = genData(allId, nowId, time, nowTime, offset)
+                let array = genData(nowDate, nowTime, allId, nowId, time, nowRunTime, offset)
                 let formatString = 'YYYY-MM-DD HH:mm'
                 array.forEach((value, index) => {
                     data.push({
@@ -55,11 +61,13 @@
             })
 
             $("#clear").click(() => {
+                $("#nowDate").val(new Date().format("yyyy-MM-dd"))
+                $("#nowTime").val(new Date().format("hh:mm"))
                 $("#allId").val("")
                 $("#nowId").val("")
                 $("#time").val("")
-                $("#nowTime").val("")
-                $("#offset").val("")
+                $("#nowRunTime").val("")
+                // $("#offset").val("")
                 $("#output").empty()
                 $("#output").append(tip)
             })
@@ -72,18 +80,21 @@
         /**
          * 生成数据
          * @author <a href="mailto:3243430237@qq.com" target="_blank">hbk01</a>
+         * @param {String} nowDate 当前日期，yyyy-MM-dd
+         * @param {String} nowTime 当前时间，hh:mm:ss
          * @param {Number} allId 总针数（即需要计算多少条数据）
          * @param {Number} nowId 当前针数（当前仪器运行到第几针）
          * @param {Number} time 一针有多少分钟（包括后运行）
-         * @param {Number} nowTime 当前这针已经运行了多少分钟
+         * @param {Number} nowRunTime 当前这针已经运行了多少分钟
          * @param {Number} offset 每一针需偏移多少分钟
          * @return {Array} dayjs
          */
-        function genData(allId, nowId, time, nowTime, offset) {
+        function genData(nowDate, nowTime, allId, nowId, time, nowRunTime, offset) {
             let array = new Array(allId)
-            let now = new dayjs()
+            let now = new dayjs(`${nowDate} ${nowTime}`)
+
             // 将当前这针的开始时间先设置好
-            array[nowId - 1] = now.subtract(nowTime, 'minute')
+            array[nowId - 1] = now.subtract(nowRunTime, 'minute')
             // 计算当前这针前面的时间
             for (let index = nowId - 2; index >= 0; index--) {
                 array[index] = array[index + 1].subtract(time, 'minute')
@@ -210,6 +221,19 @@
     <h3>进样时间</h3>
     <div class="input">
         <div>
+            <div class="inputbox nowDate">
+                <label for="nowDate">当前日期</label>
+                <div>
+                    <input type="date" id="nowDate">
+                </div>
+            </div>
+            <div class="inputbox nowTime">
+                <label for="nowTime">当前时间</label>
+                <div>
+                    <input type="time" id="nowTime">
+                </div>
+            </div>
+
             <div class="inputbox allId">
                 <label for="allId">样品总数</label>
                 <!-- 此处的 div 为解决 Safari 浏览器 align-items: baseline; 不对齐的问题 -->
@@ -228,14 +252,14 @@
                 <div><input type="number" id="nowId" inputmode="decimal" autocomplete="off"></div>
             </div>
 
-            <div class="inputbox nowTime">
-                <label for="nowTime">当前运行时间</label>
-                <div><input type="number" id="nowTime" inputmode="decimal" autocomplete="off"></div>
+            <div class="inputbox nowRunTime">
+                <label for="nowRunTime">当前运行时间</label>
+                <div><input type="number" id="nowRunTime" inputmode="decimal" autocomplete="off"></div>
             </div>
 
             <div class="inputbox offset">
                 <label for="offset">时间偏移量</label>
-                <div><input type="number" id="offset" inputmode="decimal" autocomplete="off"></div>
+                <div><input type="number" id="offset" inputmode="decimal" autocomplete="off" value="0"></div>
             </div>
 
         </div>
