@@ -21,15 +21,22 @@
         $(document).ready(() => {
             let tip = `
             <p>此功能用于计算批处理中每一针样品运行的时间。</p>
-            <p>设置时间偏移量可以将每一针的结束时间提前，用于给查看样品图谱及现配现进等操作预留时间。</p>
-            <p>仪器进样需要一定的时间，该部分时间虽然短，积累起来却不可忽视。<br>
-                此功能以当前运行样品的时间为起点，再向前/向后计算其他针的时间。所以，越远离当前运行的样品，则误差越大。
-                </p>`
+            <p>仪器进样需要一定的时间，该部分时间虽然短，积累起来却不可忽视。</p>
+            <p>此功能以当前运行样品的时间为起点，再向前或向后计算其他针的时间。所以，越远离当前运行的样品，则误差越大。</p>
+            <p>误差不可避免，但勾选<span style="background-color: black;color: white">时间补偿</span>可尽量校正该误差。</p>
+            `
             $("#output").append(tip)
 
             // 初始化当前日期和时间
             $("#nowDate").val(new Date().format("yyyy-MM-dd"))
             $("#nowTime").val(new Date().format("hh:mm"))
+
+            // 默认选中时间补偿
+            let offset = true
+            // 注册时间补偿的事件监听器
+            $("#offset").on("change", function () {
+                offset = $(this).is(":checked")
+            })
 
             $("#ok").click(() => {
                 let nowDate = $("#nowDate").val()
@@ -38,18 +45,17 @@
                 let nowId = new Decimal($("#nowId").val()).toNumber()
                 let time = new Decimal($("#time").val()).toNumber()
                 let nowRunTime = new Decimal($("#nowRunTime").val()).toNumber()
-                let offset = new Decimal($("#offset").val()).toNumber()
+
                 let data = []
 
                 // 生成数据
-                let array = genData(nowDate, nowTime, allId, nowId, time, nowRunTime, offset)
+                let array = genData(nowDate, nowTime, allId, nowId, time, nowRunTime, offset ? 30 : 1)
                 let formatString = 'YYYY-MM-DD HH:mm'
                 array.forEach((value, index) => {
                     data.push({
                         "id": index + 1,
                         "startTime": value.format(formatString),
                         "endTime": value.add(time, 'minute').format(formatString),
-                        "offsetTime": value.add(time - offset, 'minute').format(formatString)
                     })
                 })
 
@@ -67,7 +73,6 @@
                 $("#nowId").val("")
                 $("#time").val("")
                 $("#nowRunTime").val("")
-                // $("#offset").val("")
                 $("#output").empty()
                 $("#output").append(tip)
             })
@@ -86,8 +91,8 @@
          * @param {Number} nowId 当前针数（当前仪器运行到第几针）
          * @param {Number} time 一针有多少分钟（包括后运行）
          * @param {Number} nowRunTime 当前这针已经运行了多少分钟
-         * @param {Number} offset 每一针需偏移多少分钟
-         * @return {Array} dayjs
+         * @param {Number} offset 每一针需偏移多少秒（默认 30 秒）
+         * @return {Array} 保存了 dayjs 对象的数组，每一个元素代表一针的开始时间
          */
         function genData(nowDate, nowTime, allId, nowId, time, nowRunTime, offset) {
             let array = new Array(allId)
@@ -97,11 +102,11 @@
             array[nowId - 1] = now.subtract(nowRunTime, 'minute')
             // 计算当前这针前面的时间
             for (let index = nowId - 2; index >= 0; index--) {
-                array[index] = array[index + 1].subtract(time, 'minute')
+                array[index] = array[index + 1].subtract(time, 'minute').subtract(offset, 'second')
             }
             // 计算当前这针后面的时间
             for (let index = nowId; index < allId; index++) {
-                array[index] = array[index - 1].add(time, 'minute')
+                array[index] = array[index - 1].add(time, 'minute').add(offset, 'second')
             }
             return array
         }
@@ -120,15 +125,12 @@
             let lineNum = document.createElement("th")
             let startTime = document.createElement("th")
             let endTime = document.createElement("th")
-            let offset = document.createElement("th")
             lineNum.innerText = "序号"
             startTime.innerText = "开始时间"
             endTime.innerText = "结束时间"
-            offset.innerText = "偏移后"
             row.appendChild(lineNum)
             row.appendChild(startTime)
             row.appendChild(endTime)
-            // row.appendChild(offset)
             table.appendChild(row)
             let highlight = 'background-color: #ffffcc;'
             data.forEach(element => {
@@ -136,20 +138,16 @@
                 let td_id = document.createElement("td")
                 let td_start_time = document.createElement("td")
                 let td_end_time = document.createElement("td")
-                let td_offset_time = document.createElement("td")
 
                 td_id.innerText = element.id
                 td_start_time.innerText = element.startTime
-                // td_end_time.innerText = element.endTime
-                td_end_time.innerText = element.offsetTime
-                td_offset_time.innerText = element.offsetTime
+                td_end_time.innerText = element.endTime
 
                 if (element.id == nowId) tr.style = highlight
 
                 tr.appendChild(td_id)
                 tr.appendChild(td_start_time)
                 tr.appendChild(td_end_time)
-                // tr.appendChild(td_offset_time)
                 table.appendChild(tr)
             })
             return table
@@ -214,6 +212,23 @@
             font-size: medium;
             line-height: 32px;
         }
+
+        .offset {
+            display: flex;
+            display: -webkit-flex;
+            align-items: center;
+            line-height: 32px;
+        }
+
+        .offset label {
+            width: 100%;
+            line-height: 32px;
+            padding-left: 5px;
+        }
+
+        #offset {
+            width: 20px;
+        }
     </style>
 </head>
 
@@ -256,10 +271,9 @@
                 <label for="nowRunTime">当前运行时间</label>
                 <div><input type="number" id="nowRunTime" inputmode="decimal" autocomplete="off"></div>
             </div>
-
-            <div class="inputbox offset">
-                <label for="offset">时间偏移量</label>
-                <div><input type="number" id="offset" inputmode="decimal" autocomplete="off" value="0"></div>
+            <div class="offset">
+                <input type="checkbox" id="offset" checked>
+                <label for="offset">时间补偿</label>
             </div>
 
         </div>
