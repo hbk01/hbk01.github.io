@@ -21,21 +21,53 @@
         $(document).ready(() => {
             let tip = `
             <p>此功能用于计算批处理中每一针样品运行的时间。</p>
-            <p>仪器进样需要一定的时间，该部分时间虽然短，积累起来却不可忽视。</p>
-            <p>此功能以当前运行样品的时间为起点，再向前或向后计算其他针的时间。所以，越远离当前运行的样品，则误差越大。</p>
+            <p>此功能以当前运行样品的时间为起点，再向前或向后计算其他针的时间。</p>
+            <p>仪器进样需要时间，而仪器不同，进样所需时间也不同，因此该部分时间无法准确计算。
+                且该部分时间会随样品总数增多而积累，按此功能的算法，越远离当前运行的样品，则误差越大。</p>
             <p>误差不可避免，但勾选<span style="background-color: black;color: white">时间补偿</span>可尽量校正该误差。</p>
             `
             $("#output").append(tip)
 
-            // 初始化当前日期和时间
-            $("#nowDate").val(new Date().format("yyyy-MM-dd"))
-            $("#nowTime").val(new Date().format("hh:mm"))
-
             // 默认选中时间补偿
             let offset = true
+            // 默认岛津的时间补偿为 24 秒
+            let offsetSecond = 24
+            // 默认使用系统时间
+            let useSystemClock = true
+
+            // 默认使用系统时间，隐藏当前时间和日期的输入框
+            $(".nowDate").hide()
+            $(".nowTime").hide()
+
+            // 注册使用系统时间的事件监听器
+            $("#useSystemClock").on("change", function () {
+                useSystemClock = $(this).is(":checked")
+                if (useSystemClock) {
+                    $(".nowDate").hide()
+                    $(".nowTime").hide()
+                } else {
+                    $(".nowDate").show()
+                    $(".nowTime").show()
+                    $("#nowDate").val(new Date().format("yyyy-MM-dd"))
+                    $("#nowTime").val(new Date().format("hh:mm:ss"))
+                }
+            })
+
             // 注册时间补偿的事件监听器
             $("#offset").on("change", function () {
                 offset = $(this).is(":checked")
+                if (offset) {
+                    $(".offset_type").show()
+                    offsetSecond = $("input[name='offset_type']:checked").val()
+                } else {
+                    $(".offset_type").hide()
+                    offsetSecond = 0
+                }
+            })
+
+            // 注册仪器类型的事件监听器，选择不同的仪器，时间补偿也会不同
+            $(".offset_type").on("change", function () {
+                offsetSecond = $("input[name='offset_type']:checked").val()
             })
 
             $("#ok").click(() => {
@@ -48,8 +80,13 @@
 
                 let data = []
 
+                if ($("#useSystemClock").is(":checked")) {
+                    nowDate = new Date().format("yyyy-MM-dd")
+                    nowTime = new Date().format("hh:mm:ss")
+                }
+
                 // 生成数据
-                let array = genData(nowDate, nowTime, allId, nowId, time, nowRunTime, offset ? 30 : 1)
+                let array = genData(nowDate, nowTime, allId, nowId, time, nowRunTime, offsetSecond)
                 let formatString = 'YYYY-MM-DD HH:mm'
                 array.forEach((value, index) => {
                     data.push({
@@ -91,10 +128,10 @@
          * @param {Number} nowId 当前针数（当前仪器运行到第几针）
          * @param {Number} time 一针有多少分钟（包括后运行）
          * @param {Number} nowRunTime 当前这针已经运行了多少分钟
-         * @param {Number} offset 每一针需偏移多少秒（默认 30 秒）
+         * @param {Number} offsetSecond 每一针需偏移多少秒，不同的仪器会有不同偏移量，默认为岛津的 24 秒，
          * @return {Array} 保存了 dayjs 对象的数组，每一个元素代表一针的开始时间
          */
-        function genData(nowDate, nowTime, allId, nowId, time, nowRunTime, offset) {
+        function genData(nowDate, nowTime, allId, nowId, time, nowRunTime, offsetSecond) {
             let array = new Array(allId)
             let now = new dayjs(`${nowDate} ${nowTime}`)
 
@@ -102,11 +139,11 @@
             array[nowId - 1] = now.subtract(nowRunTime, 'minute')
             // 计算当前这针前面的时间
             for (let index = nowId - 2; index >= 0; index--) {
-                array[index] = array[index + 1].subtract(time, 'minute').subtract(offset, 'second')
+                array[index] = array[index + 1].subtract(time, 'minute').subtract(offsetSecond, 'second')
             }
             // 计算当前这针后面的时间
             for (let index = nowId; index < allId; index++) {
-                array[index] = array[index - 1].add(time, 'minute').add(offset, 'second')
+                array[index] = array[index - 1].add(time, 'minute').add(offsetSecond, 'second')
             }
             return array
         }
@@ -216,6 +253,7 @@
         .offset {
             display: flex;
             display: -webkit-flex;
+            margin-bottom: 5px;
             align-items: center;
             line-height: 32px;
         }
@@ -229,6 +267,57 @@
         #offset {
             width: 20px;
         }
+
+        fieldset {
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 32px;
+        }
+
+        legend {
+            font-size: small;
+            color: #777;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+        fieldset div {
+            width: 100%;
+            display: flex;
+            display: -webkit-flex;
+            align-items: center;
+            line-height: 32px;
+        }
+
+        input[type="radio"] {
+            width: 20px;
+            margin-left: 20%;
+        }
+
+        fieldset label {
+            line-height: 32px;
+            padding-left: 5px;
+        }
+
+        .useSystemClock {
+            display: flex;
+            display: -webkit-flex;
+            margin-bottom: 5px;
+            align-items: center;
+            line-height: 32px;
+        }
+
+        .useSystemClock label {
+            width: 100%;
+            line-height: 32px;
+            padding-left: 5px;
+        }
+
+        #useSystemClock {
+            width: 20px;
+        }
     </style>
 </head>
 
@@ -236,14 +325,20 @@
     <h3>进样时间</h3>
     <div class="input">
         <div>
+
+            <div class="useSystemClock">
+                <input type="checkbox" id="useSystemClock" checked>
+                <label for="useSystemClock">使用系统时间</label>
+            </div>
+
             <div class="inputbox nowDate">
-                <label for="nowDate">当前日期</label>
+                <label for="nowDate">设定当前日期</label>
                 <div>
                     <input type="date" id="nowDate">
                 </div>
             </div>
             <div class="inputbox nowTime">
-                <label for="nowTime">当前时间</label>
+                <label for="nowTime">设定当前时间</label>
                 <div>
                     <input type="time" id="nowTime">
                 </div>
@@ -271,9 +366,27 @@
                 <label for="nowRunTime">当前运行时间</label>
                 <div><input type="number" id="nowRunTime" inputmode="decimal" autocomplete="off"></div>
             </div>
+
             <div class="offset">
                 <input type="checkbox" id="offset" checked>
                 <label for="offset">时间补偿</label>
+            </div>
+
+            <div>
+                <fieldset class="offset_type">
+                    <legend>时间补偿 - 选择仪器</legend>
+
+                    <span style="font-size: small;">选择你使用的仪器，以确定时间补偿的力度。</span>
+
+                    <div>
+                        <input type="radio" value="24" name="offset_type" id="shimadzu" checked>
+                        <label for="shimadzu">岛津</label>
+
+                        <input type="radio" value="84" name="offset_type" id="agilent">
+                        <label for="agilent">安捷伦</label>
+                    </div>
+
+                </fieldset>
             </div>
 
         </div>
